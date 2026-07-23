@@ -18,3 +18,9 @@
 # 4. 临时文件
 /tmp/
 *.log
+
+# 5. 开发时用，生产不用
+local_settings.yaml
+main
+logs
+uploads
