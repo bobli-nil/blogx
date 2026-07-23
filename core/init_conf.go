@@ -1,6 +1,7 @@
 package core
 
 import (
+	"blogx_server/conf"
 	"blogx_server/flags"
 	"fmt"
 	"os"
@@ -8,26 +9,19 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Config struct {
-	System System
-}
-
-type System struct {
-	IP   string `yaml:"ip"`
-	Port int    `yaml:"port"`
-	Env  string `yaml:"env"`
-}
-
-func ReadConf() {
+func ReadConf() (c *conf.Config) {
 	byteData, err := os.ReadFile(flags.FlagOptions.File)
 	if err != nil {
 		panic(err)
 	}
 
-	var config Config
-	err = yaml.Unmarshal(byteData, &config)
+	c = new(conf.Config)
+
+	err = yaml.Unmarshal(byteData, c)
 	if err != nil {
 		panic(fmt.Sprintf("yaml配置文件解析错误 %s", err))
 	}
-	fmt.Printf("读取配置 %v 成功\n", config.System)
+	fmt.Printf("读取配置System %v, Log %v 成功\n", c.System, c.Log)
+
+	return
 }
