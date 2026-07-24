@@ -11,4 +11,6 @@ func main() {
 	global.Conf = core.ReadConf()
 	core.InitLogrus()
 	global.DB = core.InitDB()
+
+	core.InitIPAddr()
 }
