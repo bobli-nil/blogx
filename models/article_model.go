@@ -1,0 +1,23 @@
+package models
+
+type ArticleModel struct {
+	Model
+	Title        string    `gorm:"size:32" json:"title"`
+	Abstract     string    `gorm:"size:256" json:"abstract"`
+	Content      string    `json:"content"`
+	CategoryID   uint      `json:"categoryId"`
+	TagList      []string  `gorm:"type:longtext;serializer:json" json:"tagList"`
+	Cover        string    `gorm:"size:256" json:"cover"`
+	UserID       uint      `json:"userId"`
+	UserModel    UserModel `gorm:"foreignKey:UserID;references:ID" json:"-"`
+	LookCount    uint      `json:"lookCount"`
+	DiggCount    uint      `json:"diggCount"`
+	CommentCount uint      `json:"commentCount"`
+	CollectCount uint      `json:"collectCount"`
+	OpenComment  bool      `json:"openComment"`
+	Status       uint8     `json:"status"` // 状态：草稿 审核中 已发布
+}
+
+func (ArticleModel) TableName() string {
+	return "article"
+}

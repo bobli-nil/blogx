@@ -14,13 +14,13 @@ var Searcher *service.Ip2Region
 func InitIPAddr() {
 	v4Config, err := service.NewV4Config(service.VIndexCache, "init/ip2region_v4.xdb", 20)
 	if err != nil {
-		logrus.Errorf("初始化 ip2region_v4.xdb 失败: %v \n", err)
+		logrus.Errorf("初始化 ip2region_v4.xdb 失败: %v", err)
 		return
 	}
 
 	_search, err := service.NewIp2Region(v4Config, nil)
 	if err != nil {
-		logrus.Errorf("初始化 ip2region_v4.xdb 失败: %v \n", err)
+		logrus.Errorf("初始化 ip2region_v4.xdb 失败: %v", err)
 		return
 	}
 
@@ -30,7 +30,7 @@ func InitIPAddr() {
 func GetIPAddr(IP string) string {
 	region, err := Searcher.Search(IP)
 	if err != nil {
-		logrus.Errorf("错误的IP地址 %s \n", err)
+		logrus.Errorf("错误的IP地址 %s", err)
 		return "错误的IP地址"
 	}
 
