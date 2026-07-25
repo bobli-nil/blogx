@@ -21,7 +21,7 @@ func NewLoginSuccess(c *gin.Context, loginType enum.LoginType) {
 	userName := ""
 
 	global.DB.Create(&models.LogModel{
-		Title:       "用户登录",
+		Title:       "用户登录成功",
 		Content:     "",
 		LogType:     enum.LoginLogType,
 		UserID:      userID,

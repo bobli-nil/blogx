@@ -4,6 +4,7 @@ import (
 	"blogx_server/core"
 	"blogx_server/flags"
 	"blogx_server/global"
+	"blogx_server/router"
 )
 
 func main() {
@@ -19,4 +20,6 @@ func main() {
 	core.InitIPAddr()
 	// 数据表迁移
 	flags.Run()
+	// 启动Gin
+	router.Run()
 }
