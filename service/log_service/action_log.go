@@ -136,5 +136,6 @@ func GetLogFromGinContext(c *gin.Context) *ActionLog {
 		logrus.Errorf("从Gin Context进行log断言失败")
 		return nil
 	}
+	c.Set("GetLogFromGinContext", true)
 	return log
 }

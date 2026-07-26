@@ -10,12 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 登录成功日志记录
+// NewLoginSuccess 登录成功日志记录
 func NewLoginSuccess(c *gin.Context, loginType enum.LoginType) {
 	ip := c.ClientIP()
 	addr := core.GetIPAddr(ip)
 	token := c.GetHeader("token")
-	fmt.Println(":token", token)
+	fmt.Println("token", token)
 	// TODO 此处是模拟，userID和userName后续要从token中解析
 	userID := uint(1)
 	userName := ""
@@ -34,7 +34,7 @@ func NewLoginSuccess(c *gin.Context, loginType enum.LoginType) {
 	})
 }
 
-// 登录失败的日志记录
+// NewLoginFail 登录失败的日志记录
 func NewLoginFail(c *gin.Context, loginType enum.LoginType, msg string, userName string, pwd string) {
 	ip := c.ClientIP()
 	addr := core.GetIPAddr(ip)

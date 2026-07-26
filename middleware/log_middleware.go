@@ -38,7 +38,13 @@ func LogMiddleware(c *gin.Context) {
 
 	// 打印响应体
 	fmt.Println("响应体:", blw.Body.String())
-	log.SetResponse(blw.Body.Bytes())
-	log.Save()
 
+	// 注意这里，部分路由不要Save
+	value, exists := c.Get("GetLogFromGinContext")
+	b, _ := value.(bool)
+	fmt.Println("GetLogFromGinContext的值:", b)
+	if exists && b {
+		log.SetResponse(blw.Body.Bytes())
+		log.Save()
+	}
 }
