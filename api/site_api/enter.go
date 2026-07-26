@@ -20,11 +20,17 @@ func (s *SiteApi) SiteInfoView(c *gin.Context) {
 }
 
 func (s *SiteApi) SiteUpdateView(c *gin.Context) {
-	ac := log_service.NewActionLogByGin(c)
-	ac.Save()
+	log := log_service.GetLogFromGinContext(c)
+	log.SetRequest()
+	log.SetTitle("这是SiteUpdateView的标题")
+	log.SetLevel(enum.LogInfoLevel)
+	log.SetItemInfo("a", "a")
+	log.SetItemInfo("aa", 13)
+	log.SetItemWarn("b", map[string]string{"b": "这是B"})
+	log.SetItemError("c", []string{"这是切片1", "这是切片2"})
 
 	c.JSON(200, gin.H{
 		"code": 200,
-		"msg":  "ok",
+		"msg":  "站点信息更新成功",
 	})
 }
