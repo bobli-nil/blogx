@@ -1,5 +1,5 @@
 system:
-    ip: localhost
+    ip:
     port: 8080
     env: dev
 log:

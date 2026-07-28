@@ -1,36 +1,30 @@
 package site_api
 
 import (
-	"blogx_server/models/enum"
-	"blogx_server/service/log_service"
+	"blogx_server/common/res"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type SiteApi struct{}
 
 func (s *SiteApi) SiteInfoView(c *gin.Context) {
-	log_service.NewLoginSuccess(c, enum.UserNamePwdLoginType)
-	log_service.NewLoginFail(c, enum.UserNamePwdLoginType, "用户不存在", "lisi", "password")
-	c.JSON(200, gin.H{
-		"code": 200,
-		"msg":  "ok",
-	})
-	return
+	res.OkWithData("data", c)
+}
+
+type SiteUpdateReq struct {
+	Name string `json:"name" binding:"required" label:"名称"`
 }
 
 func (s *SiteApi) SiteUpdateView(c *gin.Context) {
-	log := log_service.GetLogFromGinContext(c)
-	log.SetRequest()
-	log.SetTitle("这是SiteUpdateView的标题")
-	log.SetLevel(enum.LogInfoLevel)
-	log.SetItemInfo("a", "a")
-	log.SetItemInfo("aa", 13)
-	log.SetItemWarn("b", map[string]string{"b": "这是B"})
-	log.SetItemError("c", []string{"这是切片1", "这是切片2"})
+	var requestBody SiteUpdateReq
+	err := c.ShouldBindJSON(&requestBody)
+	if err != nil {
+		logrus.Errorf("参数绑定失败 %s", err)
+		res.FailWithError(err, c)
+		return
+	}
+	res.OkWithMsg("更新成功", c)
 
-	c.JSON(200, gin.H{
-		"code": 200,
-		"msg":  "站点信息更新成功",
-	})
 }
