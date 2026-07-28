@@ -3,7 +3,6 @@ package middleware
 import (
 	"blogx_server/service/log_service"
 	"bytes"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,13 +35,9 @@ func LogMiddleware(c *gin.Context) {
 
 	c.Next()
 
-	// 打印响应体
-	fmt.Println("响应体:", blw.Body.String())
-
 	// 注意这里，部分路由不要Save
 	value, exists := c.Get("GetLogFromGinContext")
 	b, _ := value.(bool)
-	fmt.Println("GetLogFromGinContext的值:", b)
 	if exists && b {
 		log.SetResponse(blw.Body.Bytes())
 		log.Save()

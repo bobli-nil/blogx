@@ -16,6 +16,7 @@ func Run() {
 	nr := r.Group("/api")
 	nr.Use(middleware.LogMiddleware)
 	SiteRouter(nr)
+	LogRouter(nr)
 
 	addr := global.Conf.System.Addr()
 	r.Run(addr)

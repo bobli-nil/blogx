@@ -1,28 +1,28 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"reflect"
 )
 
-type Model struct {
-	ID uint
+type Log struct {
+	User User
+	ID   uint
 }
 
 type User struct {
-	Model
-	name string
+	UserID uint
+	Name   string
 }
 
 func main() {
-	a := User{
-		Model: Model{
-			ID: 1,
+	log := &Log{
+		User: User{
+			UserID: 1,
+			Name:   "lisi",
 		},
-		name: "lisi",
+		ID: 1,
 	}
-	fmt.Println(a.ID)
-	of := reflect.TypeOf(a)
-	name, b := of.FieldByName("ID")
-	fmt.Println(name, b)
+	marshal, _ := json.Marshal(log)
+	fmt.Println(string(marshal))
 }
