@@ -8,7 +8,10 @@ import (
 )
 
 func Run() {
+	gin.SetMode(global.Conf.System.GinMode)
+
 	r := gin.Default()
+	r.Static("/uploads", "uploads")
 
 	nr := r.Group("/api")
 	nr.Use(middleware.LogMiddleware)
