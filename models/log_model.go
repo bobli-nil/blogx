@@ -13,10 +13,11 @@ type LogModel struct {
 	IP          string            `gorm:"size:32" json:"ip"`
 	Addr        string            `gorm:"size:64" json:"addr"`
 	IsRead      bool              `json:"isRead"`
-	LoginStatus bool              `json:"loginStatus"`             // 登录状态
-	UserName    string            `gorm:"size:32" json:"userName"` // 登录日志的用户名
-	Pwd         string            `gorm:"size:32" json:"pwd"`      // 登录日志的密码
-	LoginType   enum.LoginType    `json:"loginType"`               // 登录类型
+	LoginStatus bool              `json:"loginStatus"`                // 登录状态
+	UserName    string            `gorm:"size:32" json:"userName"`    // 登录日志的用户名
+	Pwd         string            `gorm:"size:32" json:"pwd"`         // 登录日志的密码
+	LoginType   enum.LoginType    `json:"loginType"`                  // 登录类型
+	ServiceName string            `gorm:"size:32" json:"serviceName"` // 服务名称
 }
 
 func (LogModel) TableName() string {
