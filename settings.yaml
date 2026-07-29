@@ -6,6 +6,10 @@ system:
 log:
     app: blogx_server
     dir: logs
+jwt:
+    expire: 24
+    secret: lmr-blogx-2026
+    issuer: lmr
 db:
     user: root
     password: 199107lmr1636

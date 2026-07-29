@@ -5,6 +5,7 @@ import (
 	"blogx_server/global"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/utils/jwt"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -102,17 +103,23 @@ func (ac *ActionLog) Save() {
 
 	ip := ac.c.ClientIP()
 	addr := core.GetIPAddr(ip)
-	// TODO 后面这里改
-	userID := uint(1)
+	userID := uint(0)
+	userName := ""
+	myClaims, err := jwt.ParseTokenByGin(ac.c)
+	if err == nil && myClaims != nil {
+		userID = myClaims.UserID
+		userName = myClaims.UserName
+	}
 
-	err := global.DB.Create(&models.LogModel{
-		LogType: enum.ActionLogType,
-		Title:   ac.title,
-		Content: strings.Join(ac.itemList, "\n"),
-		Level:   ac.level,
-		UserID:  userID,
-		IP:      ip,
-		Addr:    addr,
+	err = global.DB.Create(&models.LogModel{
+		LogType:  enum.ActionLogType,
+		Title:    ac.title,
+		Content:  strings.Join(ac.itemList, "\n"),
+		Level:    ac.level,
+		UserID:   userID,
+		UserName: userName,
+		IP:       ip,
+		Addr:     addr,
 	}).Error
 	if err != nil {
 		logrus.Errorf("创建操作日志失败 %s", err)

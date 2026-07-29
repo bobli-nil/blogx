@@ -5,6 +5,7 @@ import (
 	"blogx_server/global"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/utils/jwt"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -16,9 +17,14 @@ func NewLoginSuccess(c *gin.Context, loginType enum.LoginType) {
 	addr := core.GetIPAddr(ip)
 	token := c.GetHeader("token")
 	fmt.Println("token", token)
-	// TODO 此处是模拟，userID和userName后续要从token中解析
-	userID := uint(1)
+	userID := uint(0)
 	userName := ""
+	// 从token中解析用户ID和用户名
+	myClaims, err := jwt.ParseTokenByGin(c)
+	if err == nil && myClaims != nil {
+		userID = myClaims.UserID
+		userName = myClaims.UserName
+	}
 
 	global.DB.Create(&models.LogModel{
 		Title:       "用户登录成功",
