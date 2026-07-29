@@ -36,7 +36,6 @@ func (ac *ActionLog) SetLevel(level enum.LogLevelType) {
 
 func (ac *ActionLog) SetRequest() {
 	contentType := ac.c.GetHeader("Content-Type")
-	var requestBody []byte
 	if strings.Contains(contentType, "application/json") || strings.Contains(contentType, "text/plain") {
 		byteData, err := io.ReadAll(ac.c.Request.Body)
 		if err != nil {
@@ -44,7 +43,7 @@ func (ac *ActionLog) SetRequest() {
 			return
 		}
 		ac.requestBody = byteData
-		ac.c.Request.Body = io.NopCloser(bytes.NewReader(requestBody))
+		ac.c.Request.Body = io.NopCloser(bytes.NewReader(byteData))
 	} else {
 		logrus.Warnf("请求体不是JSON")
 	}

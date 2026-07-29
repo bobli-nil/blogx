@@ -3,8 +3,10 @@ package log_api
 import (
 	"blogx_server/common"
 	"blogx_server/common/res"
+	"blogx_server/global"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/service/log_service"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +31,7 @@ type LogListResponse struct {
 	NickName string `json:"nickName"`
 }
 
+// LogListView 日志列表查询接口
 func (LogApi) LogListView(c *gin.Context) {
 	fmt.Println("--->", c.Request.URL)
 	var cr LogListRequest
@@ -39,28 +42,6 @@ func (LogApi) LogListView(c *gin.Context) {
 		return
 	}
 	fmt.Printf("入参 %+v\n", cr)
-
-	//if cr.Page < 0 {
-	//	cr.Page = 1
-	//}
-	//if cr.Limit <= 0 {
-	//	cr.Limit = 10
-	//}
-	//offset := (cr.Page - 1) * cr.Limit
-	//
-	//var list []models.LogModel
-	//condition := models.LogModel{
-	//	LogType:     cr.LogType,
-	//	Level:       cr.Level,
-	//	UserID:      cr.UserID,
-	//	IP:          cr.IP,
-	//	LoginStatus: cr.LoginStatus,
-	//	ServiceName: cr.ServiceName,
-	//}
-	//like := global.DB.Where("title LIKE ?", "%"+cr.Keyword+"%")
-	//global.DB.Preload("UserModel").Debug().Where(condition).Where(like).Offset(offset).Limit(cr.Limit).Find(&list)
-	//var count int64
-	//global.DB.Debug().Where(condition).Where(like).Model(models.LogModel{}).Count(&count)
 
 	list, count, err := common.ListQuery(models.LogModel{
 		LogType:     cr.LogType,
@@ -90,4 +71,52 @@ func (LogApi) LogListView(c *gin.Context) {
 	}
 
 	res.OkWithList(_list, int(count), c)
+}
+
+// LogReadView 日志读取与更新接口
+func (LogApi) LogReadView(c *gin.Context) {
+	var cr models.IDRequest
+	err := c.ShouldBindUri(&cr)
+	if err != nil {
+		logrus.Error("日志读取参数绑定失败：%s", err.Error())
+		res.FailWithError(err, c)
+		return
+	}
+	var log models.LogModel
+	err = global.DB.Where("id = ?", cr.ID).Take(&log).Error
+	if err != nil {
+		res.FailWithError(err, c)
+		logrus.Errorf("查询读取记录出错:%s", err.Error())
+		return
+	}
+	if !log.IsRead {
+		global.DB.Model(&log).Update("is_read", true)
+	}
+	res.OkWithMsg("更新成功", c)
+}
+
+// LogDeleteView 日志删除接口
+func (LogApi) LogDeleteView(c *gin.Context) {
+	actionLog := log_service.GetLogFromGinContext(c)
+	actionLog.SetRequest()
+	actionLog.SetTitle("删除日志")
+	actionLog.SetLevel(enum.LogInfoLevel)
+
+	var cr models.DeleteRequest
+	err := c.ShouldBindJSON(&cr)
+	if err != nil {
+		res.FailWithError(err, c)
+		logrus.Errorf("删除日志参数绑定失败: %s", err.Error())
+		return
+	}
+
+	result := global.DB.Where("id in ?", cr.IDList).Delete(&models.LogModel{})
+	if result.Error != nil {
+		res.FailWithError(result.Error, c)
+		logrus.Error("日志删除失败: %s", result.Error.Error())
+		return
+	}
+
+	tip := fmt.Sprintf("共删除%d日志", result.RowsAffected)
+	res.OkWithMsg(tip, c)
 }

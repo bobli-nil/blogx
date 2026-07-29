@@ -9,4 +9,6 @@ import (
 func LogRouter(r *gin.RouterGroup) {
 	logApi := api.App.LogApi
 	r.GET("log", logApi.LogListView)
+	r.GET("log/:id", logApi.LogReadView)
+	r.DELETE("log", logApi.LogDeleteView)
 }
