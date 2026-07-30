@@ -5,6 +5,7 @@ import (
 	"blogx_server/models/enum"
 	"blogx_server/service/redis_service/redis_jwt"
 	"blogx_server/utils/jwt"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,7 @@ func AuthMiddleware(c *gin.Context) {
 		return
 	}
 	c.Set("claims", claims)
+	fmt.Printf("AuthMiddleware里的claims %+v", claims)
 	c.Next()
 }
 

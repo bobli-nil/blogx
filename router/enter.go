@@ -18,13 +18,23 @@ func Run() {
 
 	nr := r.Group("/api")
 	nr.Use(middleware.LogMiddleware)
-	nr.Use(middleware.AdminMiddleware)
 	SiteRouter(nr)
 	LogRouter(nr)
 
-	// TODO 临时用来生成token
-	r.GET("token", func(c *gin.Context) {
-		token, err := jwt.GenerateToken(1000, "admin", enum.AdminRole)
+	// TODO 临时用来生成token，后面删除
+	r.GET("token/:role", func(c *gin.Context) {
+		userType := c.Param("role")
+
+		var userID uint = 1
+		var userName string = "张三"
+		var role enum.RoleType = enum.AdminRole
+		if userType == "common" {
+			userID = 2
+			userName = "李四"
+			role = enum.UserRole
+		}
+
+		token, err := jwt.GenerateToken(userID, userName, role)
 		if err != nil {
 			res.FailWithError(err, c)
 			return

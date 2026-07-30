@@ -7,7 +7,7 @@ log:
     app: blogx_server
     dir: logs
 jwt:
-    expire: 1
+    expire: 24
     secret: lmr-blogx-2026
     issuer: lmr
 redis:

@@ -2,13 +2,16 @@ package router
 
 import (
 	"blogx_server/api"
+	"blogx_server/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func LogRouter(r *gin.RouterGroup) {
 	logApi := api.App.LogApi
-	r.GET("log", logApi.LogListView)
-	r.GET("log/:id", logApi.LogReadView)
-	r.DELETE("log", logApi.LogDeleteView)
+	lr := r.Group("log")
+	lr.Use(middleware.AdminMiddleware)
+	lr.GET("", logApi.LogListView)
+	lr.DELETE("", logApi.LogDeleteView)
+	lr.GET(":id", logApi.LogReadView)
 }

@@ -6,4 +6,9 @@ type Config struct {
 	Jwt    Jwt    `yaml:"jwt"`
 	Redis  Redis  `yaml:"redis"`
 	DB     DB     `yaml:"db"`
+	Site   Site   `yaml:"site"`
+	Email  Email  `yaml:"email"`
+	QQ     QQ     `yaml:"qq"`
+	QiNiu  QiNiu  `yaml:"qiNiu"`
+	Ai     Ai     `yaml:"ai"`
 }
