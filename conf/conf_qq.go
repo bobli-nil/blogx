@@ -8,5 +8,5 @@ type QQ struct {
 
 // TODO 后面完善
 func (q QQ) Url() string {
-	return ""
+	return "QQ的url"
 }

@@ -40,19 +40,31 @@ func (s *SiteApi) SiteInfoView(c *gin.Context) {
 
 	switch cr.Name {
 	case "email":
-		data = global.Conf.Email
+		rep := global.Conf.Email
+		rep.AuthCode = "******"
+		data = rep
 	case "qq":
-		data = global.Conf.QQ
+		rep := global.Conf.QQ
+		rep.AppKey = "******"
+		data = rep
 	case "qiNiu":
-		data = global.Conf.QiNiu
+		rep := global.Conf.QiNiu
+		rep.SecretKey = "******"
+		data = rep
 	case "ai":
-		data = global.Conf.Ai
+		rep := global.Conf.Ai
+		rep.SecretKey = "******"
+		data = rep
 	default:
 		res.FailWithMsg("不存在配置", c)
 		return
 	}
 
 	res.OkWithData(data, c)
+}
+
+func (s *SiteApi) SiteInfoQQView(c *gin.Context) {
+	res.OkWithData(global.Conf.QQ.Url(), c)
 }
 
 type SiteUpdateReq struct {
