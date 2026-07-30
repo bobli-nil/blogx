@@ -19,6 +19,7 @@ type Seo struct {
 }
 
 type About struct {
+	Version   string `yaml:"-" json:"version"`
 	SiteAbout string `yaml:"siteAbout" json:"siteAbout"`
 	QQ        string `yaml:"qq" json:"qq"`
 	Wechat    string `yaml:"wechat" json:"wechat"`
