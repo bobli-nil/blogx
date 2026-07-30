@@ -18,6 +18,7 @@ type LogModel struct {
 	Pwd         string            `gorm:"size:32" json:"pwd"`         // 登录日志的密码
 	LoginType   enum.LoginType    `json:"loginType"`                  // 登录类型
 	ServiceName string            `gorm:"size:32" json:"serviceName"` // 服务名称
+	Role        enum.RoleType     `json:"role"`                       // 用户角色
 }
 
 func (LogModel) TableName() string {

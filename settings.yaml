@@ -7,9 +7,13 @@ log:
     app: blogx_server
     dir: logs
 jwt:
-    expire: 24
+    expire: 1
     secret: lmr-blogx-2026
     issuer: lmr
+redis:
+    addr: 123.57.220.143:6379
+    password: 199107Lmr1636
+    db: 0
 db:
     user: root
     password: 199107lmr1636
