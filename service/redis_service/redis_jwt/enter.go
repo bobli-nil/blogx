@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,6 +20,18 @@ const (
 
 func (b BlackType) String() string {
 	return fmt.Sprintf("%d", b)
+}
+
+func (b BlackType) Msg() string {
+	switch b {
+	case UserBlackType:
+		return "已注销"
+	case AdminBlackType:
+		return "禁止登录"
+	case DeviceBlackType:
+		return "设备下线"
+	}
+	return "已注销"
 }
 
 func ParseBlackType(str string) BlackType {
@@ -60,4 +73,12 @@ func HasTokenBlack(token string) (blk BlackType, ok bool) {
 	}
 	blk = ParseBlackType(val)
 	return blk, true
+}
+
+func HasTokenBlackByGin(c *gin.Context) (blk BlackType, ok bool) {
+	token := c.GetHeader("token")
+	if token == "" {
+		token = c.Query("token")
+	}
+	return HasTokenBlack(token)
 }

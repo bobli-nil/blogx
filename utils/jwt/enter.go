@@ -19,7 +19,7 @@ type MyClaims struct {
 }
 
 func GenerateToken(userID uint, userName string, role enum.RoleType) (string, error) {
-	expireTime := time.Now().Add(time.Duration(global.Conf.Jwt.Expire) * time.Second)
+	expireTime := time.Now().Add(time.Duration(global.Conf.Jwt.Expire) * time.Hour)
 
 	claims := MyClaims{
 		UserID:   userID,

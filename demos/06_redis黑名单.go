@@ -25,6 +25,7 @@ func main() {
 		fmt.Println("token生成失败")
 		return
 	}
+	fmt.Println(token)
 	redis_jwt.TokenBlack(token, redis_jwt.UserBlackType)
 	if blk, ok := redis_jwt.HasTokenBlack(token); ok {
 		fmt.Println(blk)
