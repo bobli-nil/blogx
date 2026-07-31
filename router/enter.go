@@ -20,6 +20,7 @@ func Run() {
 	nr.Use(middleware.LogMiddleware)
 	SiteRouter(nr)
 	LogRouter(nr)
+	ImageRouter(nr)
 
 	// TODO 临时用来生成token，后面删除
 	r.GET("token/:role", func(c *gin.Context) {

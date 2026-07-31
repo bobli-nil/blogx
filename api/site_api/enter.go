@@ -7,8 +7,13 @@ import (
 	"blogx_server/global"
 	"blogx_server/models/enum"
 	"blogx_server/utils/jwt"
+	"errors"
+	"fmt"
+	"os"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type SiteApi struct{}
@@ -152,6 +157,65 @@ func (s *SiteApi) SiteUpdateView(c *gin.Context) {
 
 }
 
+// TODO 未测试
 func UpdateSite(Site conf.Site) error {
+	project := Site.Project
+	seo := Site.Seo
+	if project.Icon == "" && project.Title == "" && project.WebPath == "" && seo.Keywords == "" && seo.Description == "" {
+		return errors.New("项目和SEO相关配置不能为空")
+	}
+	if project.WebPath == "" {
+		return errors.New("前端地址不能为空")
+	}
+	file, err := os.Open(project.WebPath)
+	defer file.Close()
+	if err != nil {
+		return errors.New(fmt.Sprintf("%s 文件不存在", project.WebPath))
+	}
+	doc, err := goquery.NewDocumentFromReader(file)
+	if err != nil {
+		return errors.New(fmt.Sprintf("%s 文件解析失败", project.WebPath))
+	}
+
+	if project.Title != "" {
+		doc.Find("title").SetText(project.Title)
+	}
+	if project.Icon != "" {
+		iconSelection := doc.Find(`link[rel="icon"]`)
+		fmt.Println(iconSelection.Length())
+		if iconSelection.Length() > 0 {
+			iconSelection.SetAttr("href", project.Icon)
+		} else {
+			doc.Find("head").AppendHtml(fmt.Sprintf("<link rel=\"icon\" href=\"%s\">", project.Icon))
+		}
+	}
+	if seo.Keywords != "" {
+		keywordSelection := doc.Find("meta[name='keywords']")
+		if keywordSelection.Length() > 0 {
+			keywordSelection.SetAttr("content", seo.Keywords)
+		} else {
+			doc.Find("head").AppendHtml(fmt.Sprintf("<meta name=\"keywords\" content=\"%s\">", seo.Keywords))
+		}
+	}
+	if seo.Description != "" {
+		descriptionSelection := doc.Find("meta[name='description']")
+		if descriptionSelection.Length() > 0 {
+			descriptionSelection.SetAttr("content", seo.Description)
+		} else {
+			doc.Find("head").AppendHtml(fmt.Sprintf("<meta name=\"description\" content=\"%s\">", seo.Description))
+		}
+	}
+
+	htmlStr, err := doc.Html()
+	if err != nil {
+		return errors.New("转化失败")
+	}
+
+	err = os.WriteFile(project.WebPath, []byte(htmlStr), 0666)
+	if err != nil {
+		logrus.Errorf("文件写入失败 %s", err)
+		return errors.New("文件写入失败")
+	}
+
 	return nil
 }

@@ -11,3 +11,7 @@ type ImageModel struct {
 func (ImageModel) TableName() string {
 	return "image"
 }
+
+func (i *ImageModel) WebPath() string {
+	return "/" + i.Path
+}

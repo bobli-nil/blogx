@@ -8,10 +8,10 @@ import (
 )
 
 func SiteRouter(r *gin.RouterGroup) {
+	siteApi := api.App.SiteApi
 	sr := r.Group("/site")
 	sr.Use(middleware.AuthMiddleware)
 
-	siteApi := api.App.SiteApi
 	sr.GET("qq_url", siteApi.SiteInfoQQView)
 	sr.GET(":name", siteApi.SiteInfoView)
 	sr.PUT(":name", middleware.AdminMiddleware, siteApi.SiteUpdateView)

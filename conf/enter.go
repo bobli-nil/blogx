@@ -5,6 +5,7 @@ type Config struct {
 	Log    Log    `yaml:"log"`
 	Jwt    Jwt    `yaml:"jwt"`
 	Redis  Redis  `yaml:"redis"`
+	Upload Upload `yaml:"upload"`
 	DB     DB     `yaml:"db"`
 	Site   Site   `yaml:"site"`
 	Email  Email  `yaml:"email"`

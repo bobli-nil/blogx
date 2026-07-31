@@ -14,6 +14,15 @@ redis:
   addr: 123.57.220.143:6379
   password: 199107Lmr1636
   db: 0
+upload:
+  size: 1
+  whiteList:
+    - jpg
+    - jpeg
+    - png
+    - webp
+    - gif
+  uploadDir: images001
 db:
   user: root
   password: 199107lmr1636
@@ -29,12 +38,12 @@ site:
     beian: ""
     mode: 1
   project:
-    title: ""
-    icon: ""
-    webPath: ""
+    title: 这是新的title6
+    icon: /yyy.png
+    webPath: demos/index.html
   seo:
-    keywords: ""
-    description: ""
+    keywords: kkk
+    description: ddd
   about:
     siteAbout: ""
     qq: ""
