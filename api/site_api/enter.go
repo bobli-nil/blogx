@@ -2,12 +2,13 @@ package site_api
 
 import (
 	"blogx_server/common/res"
+	"blogx_server/conf"
+	"blogx_server/core"
 	"blogx_server/global"
 	"blogx_server/models/enum"
 	"blogx_server/utils/jwt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 type SiteApi struct{}
@@ -73,13 +74,84 @@ type SiteUpdateReq struct {
 }
 
 func (s *SiteApi) SiteUpdateView(c *gin.Context) {
-	var requestBody SiteUpdateReq
-	err := c.ShouldBindJSON(&requestBody)
+	var cr SiteInfoRequest
+	err := c.ShouldBindUri(&cr)
 	if err != nil {
-		logrus.Errorf("参数绑定失败 %s", err)
 		res.FailWithError(err, c)
 		return
 	}
+
+	var rep any
+	switch cr.Name {
+	case "site":
+		var data conf.Site
+		err = c.ShouldBindJSON(&data)
+		rep = data
+	case "email":
+		var data conf.Email
+		err = c.ShouldBindJSON(&data)
+		rep = data
+	case "qq":
+		var data conf.QQ
+		err = c.ShouldBindJSON(&data)
+		rep = data
+	case "qiNiu":
+		var data conf.QiNiu
+		err = c.ShouldBindJSON(&data)
+		rep = data
+	case "ai":
+		var data conf.Ai
+		err = c.ShouldBindJSON(&data)
+		rep = data
+	default:
+		res.FailWithMsg("不存在的配置", c)
+		return
+	}
+
+	if err != nil {
+		res.FailWithError(err, c)
+		return
+	}
+
+	switch s := rep.(type) {
+	case conf.Site:
+		err := UpdateSite(s)
+		if err != nil {
+			res.FailWithError(err, c)
+			return
+		}
+		global.Conf.Site = s
+	case conf.Email:
+		if s.AuthCode == "******" {
+			s.AuthCode = global.Conf.Email.AuthCode
+		}
+		global.Conf.Email = s
+	case conf.QQ:
+		if s.AppKey == "******" {
+			s.AppKey = global.Conf.QQ.AppKey
+		}
+		global.Conf.QQ = s
+	case conf.QiNiu:
+		if s.SecretKey == "******" {
+			s.SecretKey = global.Conf.QiNiu.SecretKey
+		}
+		global.Conf.QiNiu = s
+	case conf.Ai:
+		if s.SecretKey == "******" {
+			s.SecretKey = global.Conf.Ai.SecretKey
+		}
+		global.Conf.Ai = s
+	default:
+		res.FailWithMsg("没有这个分类", c)
+		return
+	}
+
+	core.SetConf()
+
 	res.OkWithMsg("更新成功", c)
 
+}
+
+func UpdateSite(Site conf.Site) error {
+	return nil
 }

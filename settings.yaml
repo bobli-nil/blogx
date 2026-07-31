@@ -1,24 +1,79 @@
 system:
-    ip:
-    port: 8080
-    env: dev
-    gin_mode: debug
+  ip: ""
+  port: 8080
+  env: dev
+  gin_mode: debug
 log:
-    app: blogx_server
-    dir: logs
+  app: blogx_server
+  dir: logs
 jwt:
-    expire: 24
-    secret: lmr-blogx-2026
-    issuer: lmr
+  expire: 24
+  secret: lmr-blogx-2026
+  issuer: lmr
 redis:
-    addr: 123.57.220.143:6379
-    password: 199107Lmr1636
-    db: 0
+  addr: 123.57.220.143:6379
+  password: 199107Lmr1636
+  db: 0
 db:
-    user: root
-    password: 199107lmr1636
-    host: 123.57.220.143
-    port: 3306
-    db: blogx
-    debug: false
-    source: mysql
+  user: root
+  password: 199107lmr1636
+  host: 123.57.220.143
+  port: 3306
+  db: blogx
+  debug: false
+  source: mysql
+site:
+  siteInfo:
+    title: 这是站点标题
+    logo: ""
+    beian: ""
+    mode: 1
+  project:
+    title: ""
+    icon: ""
+    webPath: ""
+  seo:
+    keywords: ""
+    description: ""
+  about:
+    siteAbout: ""
+    qq: ""
+    wechat: ""
+    gitee: ""
+    bilibili: ""
+    github: ""
+  login:
+    qqLogin: false
+    usernamePwdLogin: false
+    emailPwdLogin: false
+    captcha: false
+  indexRight:
+    list: []
+  article:
+    noExamine: false
+email:
+  domain: ""
+  port: 0
+  sendEmail: ""
+  authCode: ""
+  sendNickname: ""
+  ssl: false
+  tls: false
+qq:
+  appID: ""
+  appKey: ""
+  redirect: ""
+qiNiu:
+  enable: false
+  accessKey: ""
+  secretKey: ""
+  bucket: ""
+  uri: ""
+  region: ""
+  prefix: ""
+  size: 0
+ai:
+  enable: true
+  secretKey: ""
+  nickname: ""
+  avatar: ""

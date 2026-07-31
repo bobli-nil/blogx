@@ -1,21 +1,21 @@
 package site
 
 type SiteInfo struct {
-	Title string `yaml:"title"`
-	Logo  string `yaml:"logo"`
-	Beian string `yaml:"beian"`
-	Mode  int8   `yaml:"mode"` // 1社区模式 2博客模式
+	Title string `yaml:"title" json:"title"`
+	Logo  string `yaml:"logo" json:"logo"`
+	Beian string `yaml:"beian" json:"beian"`
+	Mode  int8   `yaml:"mode" json:"mode" binding:"oneof=1 2"` // 1社区模式 2博客模式
 }
 
 type Project struct {
-	Title   string `yaml:"title"`
-	Icon    string `yaml:"icon"`
-	WebPath string `yaml:"webPath"`
+	Title   string `yaml:"title" json:"title"`
+	Icon    string `yaml:"icon" json:"icon"`
+	WebPath string `yaml:"webPath" json:"webPath"`
 }
 
 type Seo struct {
-	Keywords    string `yaml:"keywords"`
-	Description string `yaml:"description"`
+	Keywords    string `yaml:"keywords" json:"keywords"`
+	Description string `yaml:"description" json:"description"`
 }
 
 type About struct {
