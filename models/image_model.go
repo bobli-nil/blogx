@@ -1,5 +1,12 @@
 package models
 
+import (
+	"os"
+
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+)
+
 type ImageModel struct {
 	Model
 	FileName string `gorm:"size:32" json:"fileName"`
@@ -14,4 +21,12 @@ func (ImageModel) TableName() string {
 
 func (i *ImageModel) WebPath() string {
 	return "/" + i.Path
+}
+
+func (i *ImageModel) BeforeDelete(tx *gorm.DB) error {
+	err := os.Remove(i.Path)
+	if err != nil {
+		logrus.Warnf("删除图片二进制文件失败 %s", err)
+	}
+	return nil
 }
