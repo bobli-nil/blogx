@@ -4,11 +4,11 @@ import (
 	"blogx_server/common/res"
 	"blogx_server/global"
 	"blogx_server/models"
-	"blogx_server/utils"
-	"errors"
+	"blogx_server/utils/file"
+	"blogx_server/utils/hash"
+	"blogx_server/utils/qiNiu"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -28,7 +28,7 @@ func (ImageApi) UploadImageView(c *gin.Context) {
 	}
 
 	// 后缀判断
-	suffix, err := ImageSuffixJudge(fileHeader.Filename)
+	suffix, err := file.ImageSuffixJudge(fileHeader.Filename)
 	if err != nil {
 		res.FailWithError(err, c)
 		return
@@ -41,7 +41,7 @@ func (ImageApi) UploadImageView(c *gin.Context) {
 		return
 	}
 	byteData, _ := io.ReadAll(file)
-	md5String := utils.Md5(byteData)
+	md5String := hash.Md5(byteData)
 	fmt.Println("md5String", md5String)
 
 	// 判断哈希是否已经在库中
@@ -49,12 +49,12 @@ func (ImageApi) UploadImageView(c *gin.Context) {
 	err = global.DB.Model(&model).Where("hash = ?", md5String).First(&model).Error
 	if err == nil {
 		logrus.Infof("图片重复 %s %s", fileHeader.Filename, md5String)
-		res.Ok(model.WebPath(), "上传成功", c)
+		res.Ok(model.Path, "上传成功", c)
 		return
 	}
 
 	// 入库
-	filePath := fmt.Sprintf("uploads/%s/%s.%s", global.Conf.Upload.UploadDir, md5String, suffix)
+	filePath := fmt.Sprintf("%s/%s/%s.%s", global.Conf.QiNiu.Uri, global.Conf.QiNiu.Prefix, md5String, suffix)
 	model = models.ImageModel{
 		FileName: fileHeader.Filename,
 		Path:     filePath,
@@ -68,25 +68,18 @@ func (ImageApi) UploadImageView(c *gin.Context) {
 	}
 
 	// 存储图片
-	err = c.SaveUploadedFile(fileHeader, filePath)
+	//err = c.SaveUploadedFile(fileHeader, filePath)
+	//if err != nil {
+	//	res.FailWithError(err, c)
+	//	return
+	//}
+
+	// 上传到七牛云
+	url, err := qiNiu.SendFileByteData(byteData, fileHeader.Filename)
 	if err != nil {
 		res.FailWithError(err, c)
 		return
 	}
 
-	res.Ok(model.WebPath(), "上传成功", c)
-}
-
-func ImageSuffixJudge(filename string) (suffix string, err error) {
-	_list := strings.Split(filename, ".")
-	if len(_list) < 2 {
-		err = errors.New("文件名不合法")
-		return
-	}
-	suffix = _list[len(_list)-1]
-	if !utils.InList(suffix, global.Conf.Upload.WhiteList) {
-		err = errors.New("文件后缀不正确")
-		return
-	}
-	return
+	res.Ok(url, "上传成功", c)
 }

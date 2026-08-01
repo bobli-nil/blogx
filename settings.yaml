@@ -73,14 +73,14 @@ qq:
   appKey: ""
   redirect: ""
 qiNiu:
-  enable: false
-  accessKey: ""
-  secretKey: ""
-  bucket: ""
-  uri: ""
-  region: ""
-  prefix: ""
-  size: 0
+  enable: true
+  accessKey: dXTDkYpO_JTOp8bnU0U1OGDkYO1U2CKdig40pG1l
+  secretKey: smgJke38uz3t2MTZcBQt7usEdTQO_ILEagMKmDe2
+  bucket: limingru-blogx
+  uri: http://cdn.limingru.com
+  region: z2
+  prefix: blogx
+  size: 3
 ai:
   enable: true
   secretKey: ""

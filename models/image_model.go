@@ -1,6 +1,9 @@
 package models
 
 import (
+	"blogx_server/global"
+	"blogx_server/utils/file"
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -20,7 +23,9 @@ func (ImageModel) TableName() string {
 }
 
 func (i *ImageModel) WebPath() string {
-	return "/" + i.Path
+	qiNiu := global.Conf.QiNiu
+	suffix, _ := file.ImageSuffixJudge(i.FileName)
+	return fmt.Sprintf("%s/%s/%s.%s", qiNiu.Uri, qiNiu.Prefix, i.Hash, suffix)
 }
 
 func (i *ImageModel) BeforeDelete(tx *gorm.DB) error {
