@@ -1,4 +1,4 @@
-package qiNiu
+package qiniu_service
 
 import (
 	"blogx_server/global"
@@ -13,6 +13,7 @@ import (
 	"github.com/qiniu/go-sdk/v7/storagev2/uploader"
 )
 
+// SendFile 根据路径上传
 func SendFile(path string) (string, error) {
 	qiNiu := global.Conf.QiNiu
 	hash, err := hash.FileMD5(path)
@@ -44,6 +45,7 @@ func SendFile(path string) (string, error) {
 	return fmt.Sprintf("%s/%s", qiNiu.Uri, key), nil
 }
 
+// SendFileByteData 根据[]byte和fileName上传
 func SendFileByteData(byteData []byte, fileName string) (string, error) {
 	qiNiu := global.Conf.QiNiu
 	hashString := hash.Md5(byteData)

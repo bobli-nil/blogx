@@ -14,4 +14,5 @@ func ImageRouter(r *gin.RouterGroup) {
 	ir.POST("upload", middleware.AuthMiddleware, imageApi.UploadImageView)
 	ir.GET("list", middleware.AuthMiddleware, imageApi.ImageListView)
 	ir.DELETE("", middleware.AdminMiddleware, imageApi.ImageRemoveView)
+	ir.POST("token", middleware.AuthMiddleware, imageApi.QiNiuGenToken)
 }

@@ -4,9 +4,9 @@ import (
 	"blogx_server/common/res"
 	"blogx_server/global"
 	"blogx_server/models"
+	"blogx_server/service/qiniu_service"
 	"blogx_server/utils/file"
 	"blogx_server/utils/hash"
-	"blogx_server/utils/qiNiu"
 	"fmt"
 	"io"
 
@@ -75,7 +75,7 @@ func (ImageApi) UploadImageView(c *gin.Context) {
 	//}
 
 	// 上传到七牛云
-	url, err := qiNiu.SendFileByteData(byteData, fileHeader.Filename)
+	url, err := qiniu_service.SendFileByteData(byteData, fileHeader.Filename)
 	if err != nil {
 		res.FailWithError(err, c)
 		return
