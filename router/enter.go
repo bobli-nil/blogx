@@ -21,6 +21,7 @@ func Run() {
 	SiteRouter(nr)
 	LogRouter(nr)
 	ImageRouter(nr)
+	BannerRouter(nr)
 
 	// TODO 临时用来生成token，后面删除
 	r.GET("token/:role", func(c *gin.Context) {

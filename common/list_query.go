@@ -44,6 +44,7 @@ type Options struct {
 
 func ListQuery[T any](model T, option Options) (list []T, count int, err error) {
 	// 基础查询
+	fmt.Printf("---> %+v \n", model)
 	query := global.DB.Model(&model).Where(&model)
 
 	// 模糊匹配
