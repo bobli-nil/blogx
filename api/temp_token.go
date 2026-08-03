@@ -1,0 +1,31 @@
+package api
+
+import (
+	"blogx_server/common/res"
+	"blogx_server/models/enum"
+	"blogx_server/utils/jwt"
+
+	"github.com/gin-gonic/gin"
+)
+
+func GenerateTempToken(r *gin.Engine) {
+	r.GET("token/:role", func(c *gin.Context) {
+		userType := c.Param("role")
+
+		var userID uint = 1
+		var userName string = "张三"
+		var role enum.RoleType = enum.AdminRole
+		if userType == "common" {
+			userID = 2
+			userName = "李四"
+			role = enum.UserRole
+		}
+
+		token, err := jwt.GenerateToken(userID, userName, role)
+		if err != nil {
+			res.FailWithError(err, c)
+			return
+		}
+		res.OkWithData(token, c)
+	})
+}
