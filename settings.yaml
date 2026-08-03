@@ -61,11 +61,11 @@ site:
   article:
     noExamine: false
 email:
-  domain: ""
-  port: 0
-  sendEmail: ""
-  authCode: ""
-  sendNickname: ""
+  domain: smtp.qq.com
+  port: 587
+  sendEmail: 1172778182@qq.com
+  authCode: cvjtoycgcjyvfegh
+  sendNickname: blogx
   ssl: false
   tls: false
 qq:
