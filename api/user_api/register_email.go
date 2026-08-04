@@ -32,21 +32,10 @@ func (UserApi) RegisterEmailView(c *gin.Context) {
 		return
 	}
 
-	//value, ok := global.EmailVerifyStore.Load(cr.EmailID)
-	//global.EmailVerifyStore.Delete(cr.EmailID)
-	//if !ok {
-	//	res.FailWithMsg("邮箱验证失败", c)
-	//	return
-	//}
-	//emailInfo, ok := value.(email_store.EmailStoreInfo)
-	//if !ok {
-	//	res.FailWithMsg("邮箱验证失败", c)
-	//	return
-	//}
-	//if emailInfo.Code != cr.Code {
-	//	res.FailWithMsg("邮箱验证失败", c)
-	//	return
-	//}
+	if !global.Conf.Site.Login.EmailPwdLogin {
+		res.FailWithMsg("邮箱密码登录未开启", c)
+		return
+	}
 
 	// 入库
 	uname := utils.GenerateRandomDigitsSimple(4)

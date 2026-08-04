@@ -17,11 +17,11 @@ redis:
 upload:
   size: 1
   whiteList:
-    - jpg
-    - jpeg
-    - png
-    - webp
-    - gif
+  - jpg
+  - jpeg
+  - png
+  - webp
+  - gif
   uploadDir: images001
 db:
   user: root
@@ -53,9 +53,9 @@ site:
     github: ""
   login:
     qqLogin: false
-    usernamePwdLogin: false
-    emailPwdLogin: false
-    captcha: true
+    usernamePwdLogin: true
+    emailPwdLogin: true
+    captcha: false
   indexRight:
     list: []
   article:
