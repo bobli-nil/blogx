@@ -20,6 +20,7 @@ type UserDetailResponse struct {
 	Abstract       string                `json:"abstract"`
 	RegisterSource enum.RegisterSource   `json:"registerSource"`
 	LikeTags       []string              `json:"likeTags"`
+	CodeAge        int                   `json:"codeAge"`
 	UserConf       *models.UserConfModel `json:"userConf"`
 }
 
@@ -41,6 +42,7 @@ func (UserApi) UserDetailView(c *gin.Context) {
 		Nickname:       user.Nickname,
 		Avatar:         user.Avatar,
 		Abstract:       user.Abstract,
+		CodeAge:        user.CodeAge(),
 		RegisterSource: user.RegisterSource,
 	}
 	if user.UserConfModel != nil {

@@ -2,6 +2,7 @@ package models
 
 import (
 	"blogx_server/models/enum"
+	"math"
 	"time"
 )
 
@@ -14,14 +15,20 @@ type UserModel struct {
 	Avatar         string              `gorm:"size:256" json:"avatar"`
 	Abstract       string              `gorm:"size:256" json:"abstract"` // 简介
 	RegisterSource enum.RegisterSource `json:"registerSource"`           // 注册来源
-	CodeAge        int                 `json:"codeAge"`                  // 码龄
 	OpenID         string              `gorm:"size:64" json:"openID"`    // 第三方登录ID
 	Role           enum.RoleType       `json:"role"`                     // 角色 1管理员 2普通用户 3访客
 	UserConfModel  *UserConfModel      `gorm:"foreignKey:UserID" json:"-"`
+	IP             string              `gorm:"size:64" json:"ip"`
+	Address        string              `gorm:"size:128" json:"address"`
 }
 
-func (UserModel) TableName() string {
+func (*UserModel) TableName() string {
 	return "user"
+}
+
+func (u *UserModel) CodeAge() int {
+	sub := time.Now().Sub(*u.CreatedAt)
+	return int(math.Ceil(sub.Hours() / 24 / 365))
 }
 
 type UserConfModel struct {
