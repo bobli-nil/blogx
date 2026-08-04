@@ -17,6 +17,7 @@ type UserModel struct {
 	CodeAge        int                 `json:"codeAge"`                  // 码龄
 	OpenID         string              `gorm:"size:64" json:"openID"`    // 第三方登录ID
 	Role           enum.RoleType       `json:"role"`                     // 角色 1管理员 2普通用户 3访客
+	UserConfModel  *UserConfModel      `gorm:"foreignKey:UserID" json:"-"`
 }
 
 func (UserModel) TableName() string {
