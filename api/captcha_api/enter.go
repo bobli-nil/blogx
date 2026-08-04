@@ -26,6 +26,7 @@ func (CaptchaApi) CaptchaCreateView(c *gin.Context) {
 		return
 	}
 	fmt.Println(answer)
+	global.Store.Set(id, answer)
 	res.OkWithData(&CaptchaResponse{
 		CaptchaID: id,
 		Captcha:   b64s,
