@@ -6,8 +6,8 @@ import (
 	"blogx_server/models"
 	"blogx_server/models/enum"
 	"blogx_server/utils"
-	"blogx_server/utils/email_store"
 	"blogx_server/utils/jwt"
+	pwd2 "blogx_server/utils/pwd"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -15,9 +15,9 @@ import (
 )
 
 type RegisterEmailRequest struct {
-	EmailID string `json:"emailID" binding:"required"`
-	Code    string `json:"code" binding:"required"`
-	Pwd     string `json:"pwd" binding:"required"`
+	//EmailID string `json:"emailID" binding:"required"`
+	//Code    string `json:"code" binding:"required"`
+	Pwd string `json:"pwd" binding:"required"`
 }
 
 type RegisterEmailResponse struct {
@@ -32,30 +32,41 @@ func (UserApi) RegisterEmailView(c *gin.Context) {
 		return
 	}
 
-	value, ok := global.EmailVerifyStore.Load(cr.EmailID)
-	global.EmailVerifyStore.Delete(cr.EmailID)
-	if !ok {
-		res.FailWithMsg("邮箱验证失败", c)
-		return
-	}
-	emailInfo, ok := value.(email_store.EmailStoreInfo)
-	if !ok {
-		res.FailWithMsg("邮箱验证失败", c)
-		return
-	}
-	if emailInfo.Code != cr.Code {
-		res.FailWithMsg("邮箱验证失败", c)
-		return
-	}
+	//value, ok := global.EmailVerifyStore.Load(cr.EmailID)
+	//global.EmailVerifyStore.Delete(cr.EmailID)
+	//if !ok {
+	//	res.FailWithMsg("邮箱验证失败", c)
+	//	return
+	//}
+	//emailInfo, ok := value.(email_store.EmailStoreInfo)
+	//if !ok {
+	//	res.FailWithMsg("邮箱验证失败", c)
+	//	return
+	//}
+	//if emailInfo.Code != cr.Code {
+	//	res.FailWithMsg("邮箱验证失败", c)
+	//	return
+	//}
 
 	// 入库
 	uname := utils.GenerateRandomDigitsSimple(4)
+	pwd, _ := pwd2.GenerateFromPassword(cr.Pwd)
+	value, ok := c.Get("email")
+	if !ok {
+		res.FailWithMsg("获取email失败", c)
+		return
+	}
+	email, ok := value.(string)
+	if !ok {
+		res.FailWithMsg("获取email失败", c)
+		return
+	}
 	var user = models.UserModel{
 		Username:       fmt.Sprintf("b_%s", uname),
 		Nickname:       "邮箱用户",
 		RegisterSource: enum.RegisterEmailSourceType,
-		Password:       "",
-		Email:          emailInfo.Email,
+		Password:       pwd,
+		Email:          email,
 		Role:           enum.UserRole,
 	}
 	err = global.DB.Create(&user).Error

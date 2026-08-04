@@ -50,11 +50,11 @@ func (UserApi) SendEmailView(c *gin.Context) {
 		return
 	}
 
-	//global.Store.Set(uuidStr, code)
-	global.EmailVerifyStore.Store(uuidStr, email_store.EmailStoreInfo{
-		Email: cr.Email,
-		Code:  code,
-	})
+	//global.EmailVerifyStore.Store(uuidStr, email_store.EmailStoreInfo{
+	//	Email: cr.Email,
+	//	Code:  code,
+	//})
+	email_store.Set(uuidStr, cr.Email, code)
 
 	res.OkWithData(SendEmailResponse{
 		EmailID: uuidStr,
