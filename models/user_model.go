@@ -1,19 +1,22 @@
 package models
 
-import "time"
+import (
+	"blogx_server/models/enum"
+	"time"
+)
 
 type UserModel struct {
 	Model
-	Username       string `gorm:"size:32" json:"username"`
-	Nickname       string `gorm:"size:32" json:"nickname"`
-	Email          string `gorm:"size:128" json:"email"`
-	Password       string `gorm:"size:64" json:"-"`
-	Avatar         string `gorm:"size:256" json:"avatar"`
-	Abstract       string `gorm:"size:256" json:"abstract"` // 简介
-	RegisterSource int8   `json:"registerSource"`           // 注册来源
-	CodeAge        int    `json:"codeAge"`                  // 码龄
-	OpenID         string `gorm:"size:64" json:"openID"`    // 第三方登录ID
-	Role           uint8  `json:"role"`                     // 角色 1管理员 2普通用户 3访客
+	Username       string              `gorm:"size:32" json:"username"`
+	Nickname       string              `gorm:"size:32" json:"nickname"`
+	Email          string              `gorm:"size:128" json:"email"`
+	Password       string              `gorm:"size:64" json:"-"`
+	Avatar         string              `gorm:"size:256" json:"avatar"`
+	Abstract       string              `gorm:"size:256" json:"abstract"` // 简介
+	RegisterSource enum.RegisterSource `json:"registerSource"`           // 注册来源
+	CodeAge        int                 `json:"codeAge"`                  // 码龄
+	OpenID         string              `gorm:"size:64" json:"openID"`    // 第三方登录ID
+	Role           enum.RoleType       `json:"role"`                     // 角色 1管理员 2普通用户 3访客
 }
 
 func (UserModel) TableName() string {
