@@ -4,6 +4,7 @@ import (
 	"blogx_server/common/res"
 	"blogx_server/global"
 	"blogx_server/models"
+	"blogx_server/models/enum"
 	"blogx_server/service/email_service"
 	"blogx_server/utils"
 	"blogx_server/utils/email_store"
@@ -42,6 +43,17 @@ func (UserApi) SendEmailView(c *gin.Context) {
 		}
 		err = email_service.SendRegisterCode(cr.Email, code)
 	case 2:
+		var user models.UserModel
+		err = global.DB.Take(&user, "email = ?", cr.Email).Error
+		if err != nil {
+			res.FailWithMsg("该邮箱不存在", c)
+			return
+		}
+		if user.RegisterSource != enum.RegisterEmailSourceType {
+			res.FailWithMsg("非邮箱注册无法重置密码", c)
+			return
+		}
+
 		err = email_service.SendResetPwdCode(cr.Email, code)
 	}
 	if err != nil {

@@ -16,8 +16,6 @@ import (
 )
 
 type RegisterEmailRequest struct {
-	//EmailID string `json:"emailID" binding:"required"`
-	//Code    string `json:"code" binding:"required"`
 	Pwd string `json:"pwd" binding:"required"`
 }
 
