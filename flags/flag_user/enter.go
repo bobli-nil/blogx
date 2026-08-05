@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
+	"gorm.io/gorm"
 )
 
 type User struct{}
@@ -67,13 +68,29 @@ func (User) Create() {
 
 	// 创建用户
 	passwordHash, _ := pwd.GenerateFromPassword(password)
-	err = global.DB.Create(&models.UserModel{
+	user := models.UserModel{
 		Username: username,
 		Nickname: username,
 		Password: passwordHash,
 		Role:     role,
-	}).Error
+	}
+	err = global.DB.Transaction(func(tx *gorm.DB) error {
+		if err = global.DB.Create(&user).Error; err != nil {
+			fmt.Println("创建用户失败")
+			return err
+		}
+		userConf := models.UserConfModel{
+			UserID:             user.ID,
+			UpdateUsernameDate: user.CreatedAt,
+		}
+		if err := global.DB.Create(&userConf).Error; err != nil {
+			fmt.Println("创建用户失败")
+			return err
+		}
+		return nil
+	})
 	if err != nil {
+		fmt.Println("创建用户失败")
 		fmt.Println(err)
 	}
 	fmt.Println("创建成功")

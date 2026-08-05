@@ -12,7 +12,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 type RegisterEmailRequest struct {
@@ -25,8 +25,7 @@ type RegisterEmailResponse struct {
 
 func (UserApi) RegisterEmailView(c *gin.Context) {
 	var cr RegisterEmailRequest
-	err := c.ShouldBindJSON(&cr)
-	if err != nil {
+	if err := c.ShouldBindJSON(&cr); err != nil {
 		res.FailWithError(err, c)
 		return
 	}
@@ -36,7 +35,7 @@ func (UserApi) RegisterEmailView(c *gin.Context) {
 		return
 	}
 
-	// 入库
+	// 再 userModel和userConfModel里分别创建一条数据
 	uname := utils.GenerateRandomDigitsSimple(4)
 	pwd, _ := pwd2.GenerateFromPassword(cr.Pwd)
 	value, ok := c.Get("email")
@@ -49,6 +48,7 @@ func (UserApi) RegisterEmailView(c *gin.Context) {
 		res.FailWithMsg("获取email失败", c)
 		return
 	}
+
 	var user = models.UserModel{
 		Username:       fmt.Sprintf("b_%s", uname),
 		Nickname:       "邮箱用户",
@@ -57,10 +57,23 @@ func (UserApi) RegisterEmailView(c *gin.Context) {
 		Email:          email,
 		Role:           enum.UserRole,
 	}
-	err = global.DB.Create(&user).Error
+	err := global.DB.Transaction(func(tx *gorm.DB) error {
+		if err := global.DB.Create(&user).Error; err != nil {
+			res.FailWithMsg("注册失败", c)
+			return err
+		}
+		userConf := models.UserConfModel{
+			UserID:             user.ID,
+			UpdateUsernameDate: user.CreatedAt,
+		}
+		if err := global.DB.Create(&userConf).Error; err != nil {
+			res.FailWithMsg("注册失败", c)
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		res.FailWithMsg("注册失败", c)
-		logrus.Errorf("邮箱注册失败 %s", err)
 		return
 	}
 
