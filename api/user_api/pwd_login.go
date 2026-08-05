@@ -4,6 +4,7 @@ import (
 	"blogx_server/common/res"
 	"blogx_server/global"
 	"blogx_server/models"
+	"blogx_server/service/user_service"
 	"blogx_server/utils/jwt"
 	pwd2 "blogx_server/utils/pwd"
 
@@ -51,6 +52,10 @@ func (UserApi) PwdLogin(c *gin.Context) {
 		res.FailWithMsg("获取token失败", c)
 		return
 	}
+
+	// 记录登录日志
+	user_service.NewUserService(user).UserLogin(c)
+
 	res.OkWithData(token, c)
 
 }
