@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"blogx_server/global"
+	"blogx_server/models"
 	"blogx_server/models/enum"
 	"errors"
 	"strings"
@@ -16,6 +17,11 @@ type MyClaims struct {
 	UserName string        `json:"userName"`
 	Role     enum.RoleType `json:"role"`
 	jwt.RegisteredClaims
+}
+
+func (claim *MyClaims) GetUser() (user models.UserModel, err error) {
+	err = global.DB.Take(&user, claim.UserID).Error
+	return
 }
 
 func GenerateToken(userID uint, userName string, role enum.RoleType) (string, error) {
