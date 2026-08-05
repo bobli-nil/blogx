@@ -15,7 +15,7 @@ import (
 )
 
 type SendEmailRequest struct {
-	Type  int    `json:"type" binding:"oneof=1 2"`
+	Type  int    `json:"type" binding:"oneof=1 2 3"` // 1注册 2重置 3绑定邮箱
 	Email string `json:"email" binding:"required"`
 }
 
@@ -55,17 +55,21 @@ func (UserApi) SendEmailView(c *gin.Context) {
 		}
 
 		err = email_service.SendResetPwdCode(cr.Email, code)
+	case 3:
+		err = global.DB.Take(&models.UserModel{}, "email = ?", cr.Email).Error
+		if err == nil {
+			res.FailWithMsg("该邮箱已使用", c)
+			return
+		}
+		err = email_service.SendBindEmailCode(cr.Email, code)
 	}
+
 	if err != nil {
 		res.FailWithError(err, c)
 		logrus.Errorf("邮件发送失败 %s", err.Error())
 		return
 	}
 
-	//global.EmailVerifyStore.Store(uuidStr, email_store.EmailStoreInfo{
-	//	Email: cr.Email,
-	//	Code:  code,
-	//})
 	email_store.Set(uuidStr, cr.Email, code)
 
 	res.OkWithData(SendEmailResponse{
