@@ -21,11 +21,6 @@ type AdminUserInfoUpdateRequest struct {
 }
 
 func (UserApi) AdminUserInfoUpdateView(c *gin.Context) {
-	//var cr AdminUserInfoUpdateRequest
-	//if err := c.ShouldBindJSON(&cr); err != nil {
-	//	res.FailWithError(err, c)
-	//	return
-	//}
 	cr := middleware.GetBind[AdminUserInfoUpdateRequest](c)
 
 	userMap := mps.Struct2Map(cr, "s-u")
