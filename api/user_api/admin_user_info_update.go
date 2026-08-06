@@ -3,6 +3,7 @@ package user_api
 import (
 	"blogx_server/common/res"
 	"blogx_server/global"
+	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/models/enum"
 	"blogx_server/utils/mps"
@@ -20,11 +21,12 @@ type AdminUserInfoUpdateRequest struct {
 }
 
 func (UserApi) AdminUserInfoUpdateView(c *gin.Context) {
-	var cr AdminUserInfoUpdateRequest
-	if err := c.ShouldBindJSON(&cr); err != nil {
-		res.FailWithError(err, c)
-		return
-	}
+	//var cr AdminUserInfoUpdateRequest
+	//if err := c.ShouldBindJSON(&cr); err != nil {
+	//	res.FailWithError(err, c)
+	//	return
+	//}
+	cr := middleware.GetBind[AdminUserInfoUpdateRequest](c)
 
 	userMap := mps.Struct2Map(cr, "s-u")
 

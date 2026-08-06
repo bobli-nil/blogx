@@ -2,6 +2,7 @@ package router
 
 import (
 	"blogx_server/api"
+	"blogx_server/api/user_api"
 	"blogx_server/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -20,5 +21,5 @@ func UserRouter(c *gin.RouterGroup) {
 	ur.PUT("reset_password", middleware.EmailVerifyMiddleware, userApi.ResetPassword)
 	ur.PUT("bind_email", middleware.AuthMiddleware, middleware.EmailVerifyMiddleware, userApi.BindEmailView)
 	ur.PUT("", middleware.AuthMiddleware, userApi.UserInfoUpdateView)
-	ur.PUT("admin", middleware.AdminMiddleware, userApi.AdminUserInfoUpdateView)
+	ur.PUT("admin", middleware.AdminMiddleware, middleware.BindJSONMiddleware[user_api.AdminUserInfoUpdateRequest], userApi.AdminUserInfoUpdateView)
 }
