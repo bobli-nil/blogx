@@ -19,5 +19,5 @@ func UserRouter(c *gin.RouterGroup) {
 	ur.PUT("update_password", middleware.AuthMiddleware, userApi.UpdatePassword)
 	ur.PUT("reset_password", middleware.EmailVerifyMiddleware, userApi.ResetPassword)
 	ur.PUT("bind_email", middleware.AuthMiddleware, middleware.EmailVerifyMiddleware, userApi.BindEmailView)
-	ur.PUT("user_info_update", middleware.AuthMiddleware, userApi.UserInfoUpdateView)
+	ur.PUT("", middleware.AuthMiddleware, userApi.UserInfoUpdateView)
 }
