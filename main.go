@@ -22,6 +22,8 @@ func main() {
 	core.InitIPAddr()
 	// 数据表迁移、创建用户等命令行操作
 	flags.Run()
+	// 连接ES
+	global.ESClient = core.EsConnect()
 	// 启动Gin
 	router.Run()
 }
