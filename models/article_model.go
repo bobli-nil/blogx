@@ -1,5 +1,7 @@
 package models
 
+import _ "embed"
+
 type ArticleModel struct {
 	Model
 	Title        string    `gorm:"size:32" json:"title"`
@@ -20,4 +22,15 @@ type ArticleModel struct {
 
 func (ArticleModel) TableName() string {
 	return "article"
+}
+
+//go:embed mappings/article_mapping.json
+var articleMapping string
+
+func (ArticleModel) Mapping() string {
+	return articleMapping
+}
+
+func (ArticleModel) Index() string {
+	return "article_index"
 }

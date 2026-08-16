@@ -9,6 +9,7 @@ import (
 type Options struct {
 	File    string
 	DB      bool
+	ES      bool
 	Version bool
 	Type    string
 	Sub     string
@@ -19,6 +20,7 @@ var FlagOptions = new(Options)
 func Parse() {
 	flag.StringVar(&FlagOptions.File, "f", "settings.yaml", "配置文件")
 	flag.BoolVar(&FlagOptions.DB, "db", false, "数据库迁移")
+	flag.BoolVar(&FlagOptions.ES, "es", false, "创建ES索引")
 	flag.BoolVar(&FlagOptions.Version, "v", false, "版本")
 	flag.StringVar(&FlagOptions.Type, "t", "", "类型")
 	flag.StringVar(&FlagOptions.Sub, "s", "", "子类型")
@@ -28,6 +30,11 @@ func Parse() {
 func Run() {
 	if FlagOptions.DB {
 		FlagDB()
+		os.Exit(0)
+	}
+
+	if FlagOptions.ES {
+		ESIndex()
 		os.Exit(0)
 	}
 

@@ -7,13 +7,19 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/plugin/dbresolver"
 )
 
 func InitDB() *gorm.DB {
 	DB := global.Conf.DB
-	url := DB.DSN()
 
-	db, err := gorm.Open(mysql.Open(url), &gorm.Config{
+	if len(DB) == 0 {
+		logrus.Fatalf("未配置数据库")
+	}
+
+	dc := DB[0] // 读写库
+
+	db, err := gorm.Open(mysql.Open(dc.DSN()), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
@@ -27,8 +33,22 @@ func InitDB() *gorm.DB {
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(50)
 	sqlDB.SetConnMaxLifetime(time.Hour)
-
 	logrus.Infof("数据库连接成功")
+
+	if len(DB) > 1 {
+		var readList []gorm.Dialector
+		for _, v := range DB[1:] {
+			readList = append(readList, mysql.Open(v.DSN()))
+		}
+		err = db.Use(dbresolver.Register(dbresolver.Config{
+			Sources:  []gorm.Dialector{mysql.Open(dc.DSN())},
+			Replicas: readList,
+			Policy:   dbresolver.RandomPolicy{},
+		}))
+		if err != nil {
+			logrus.Fatalf("读写配置错误 %s", err)
+		}
+	}
 
 	return db
 }

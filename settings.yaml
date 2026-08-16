@@ -24,21 +24,20 @@ upload:
   - gif
   uploadDir: images001
 db:
-  user: root
-  password: 123456
-  host: 118.25.141.36
-  port: 3306
-  db: blogx
-  debug: false
-  source: mysql
-db2:
-  user: root
-  password: 123456
-  host: 118.25.141.36
-  port: 3307
-  db: blogx
-  debug: false
-  source: mysql
+  - user: root
+    password: 123456
+    host: 118.25.141.36
+    port: 3306
+    db: blogx
+    debug: false
+    source: mysql
+  - user: root
+    password: 123456
+    host: 118.25.141.36
+    port: 3307
+    db: blogx
+    debug: false
+    source: mysql
 es:
   url: http://118.25.141.36:9200
   username:

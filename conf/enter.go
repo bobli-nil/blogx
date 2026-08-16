@@ -6,8 +6,7 @@ type Config struct {
 	Jwt    Jwt    `yaml:"jwt"`
 	Redis  Redis  `yaml:"redis"`
 	Upload Upload `yaml:"upload"`
-	DB     DB     `yaml:"db"`
-	DB2    DB     `yaml:"db2"`
+	DB     []DB   `yaml:"db"`
 	ES     ES     `yaml:"es"`
 	Site   Site   `yaml:"site"`
 	Email  Email  `yaml:"email"`
