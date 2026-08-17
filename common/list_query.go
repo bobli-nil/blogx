@@ -35,11 +35,12 @@ func (p PageInfo) GetOffset() int {
 }
 
 type Options struct {
-	PageInfo PageInfo
-	Likes    []string
-	PreLoads []string
-	Where    *gorm.DB
-	Debug    bool
+	PageInfo     PageInfo
+	Likes        []string
+	PreLoads     []string
+	Where        *gorm.DB
+	DefaultOrder string
+	Debug        bool
 }
 
 func ListQuery[T any](model T, option Options) (list []T, count int, err error) {
@@ -76,6 +77,10 @@ func ListQuery[T any](model T, option Options) (list []T, count int, err error) 
 	// 排序
 	if option.PageInfo.Order != "" {
 		query = query.Order(option.PageInfo.Order)
+	} else {
+		if option.DefaultOrder != "" {
+			query = query.Order(option.DefaultOrder)
+		}
 	}
 
 	// 查总数
