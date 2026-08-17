@@ -73,3 +73,28 @@ func SendFileByteData(byteData []byte, fileName string) (string, error) {
 	}
 	return fmt.Sprintf("%s/%s", qiNiu.Uri, key), nil
 }
+
+// SendFileWithoutSuffix 直接使用hash作为文件名，不加后缀
+func SendFileWithoutSuffix(byteData []byte) (string, error) {
+	qiNiu := global.Conf.QiNiu
+	hashString := hash.Md5(byteData)
+	_fileName := fmt.Sprintf("%s", hashString)
+	key := fmt.Sprintf("%s/%s", qiNiu.Prefix, _fileName)
+
+	mac := credentials.NewCredentials(qiNiu.AccessKey, qiNiu.SecretKey)
+	uploadManager := uploader.NewUploadManager(&uploader.UploadManagerOptions{
+		Options: http_client.Options{
+			Credentials: mac,
+		},
+	})
+	err := uploadManager.UploadReader(context.Background(), bytes.NewReader(byteData), &uploader.ObjectOptions{
+		BucketName: qiNiu.Bucket,
+		ObjectName: &key,
+		FileName:   _fileName,
+	}, nil)
+
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/%s", qiNiu.Uri, key), nil
+}
