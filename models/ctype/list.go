@@ -3,6 +3,7 @@ package ctype
 import (
 	"database/sql/driver"
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -17,6 +18,8 @@ func (j *List) Scan(value any) error {
 	return errors.New("类型错误")
 }
 
-func (j *List) Value() (driver.Value, error) {
-	return strings.Join(*j, ","), nil
+func (j List) Value() (driver.Value, error) {
+	res := strings.Join(j, ",")
+	fmt.Println("---->", res)
+	return res, nil
 }
