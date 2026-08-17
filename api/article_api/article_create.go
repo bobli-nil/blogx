@@ -21,7 +21,7 @@ type ArticleCreateReq struct {
 	Abstract    string             `json:"abstract"`
 	Content     string             `json:"content" binding:"required"`
 	CategoryID  *uint              `json:"categoryID"`
-	TagList     ctype.List         `json:"tagList"`
+	TagList     ctype.List         `json:"tagList gorm:"type:varchar(255)"`
 	Cover       string             `json:"cover"`
 	OpenComment bool               `json:"openComment"`
 	Status      enum.ArticleStatus `json:"status" binding:"oneof=1 2"`
@@ -38,7 +38,7 @@ func (ArticleApi) ArticleCreateView(c *gin.Context) {
 
 	// 判断文章分类是不是自己创建的
 	var category models.CategoryModel
-	err = global.DB.Take(&category, "id = ? and user_id = ?", *cr.CategoryID, user.ID).Error
+	err = global.DB.Take(&category, "id = ? and user_id = ?", cr.CategoryID, user.ID).Error
 	if err != nil {
 		res.FailWithMsg("文章分类不存在", c)
 		return
@@ -82,12 +82,13 @@ func (ArticleApi) ArticleCreateView(c *gin.Context) {
 		UserID:      user.ID,
 		Status:      cr.Status,
 	}
-	if global.Conf.Site.Article.NoExamine {
+	if cr.Status == enum.ArticleStatusExamined && global.Conf.Site.Article.NoExamine {
 		article.Status = enum.ArticleStatusPublished
 	}
 
 	err = global.DB.Create(&article).Error
 	if err != nil {
+		fmt.Println("---->", err)
 		res.FailWithMsg("文章创建失败", c)
 		return
 	}
