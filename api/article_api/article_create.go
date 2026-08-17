@@ -8,7 +8,11 @@ import (
 	"blogx_server/models/ctype"
 	"blogx_server/models/enum"
 	"blogx_server/utils/jwt"
+	"blogx_server/utils/markdown"
+	"bytes"
+	"fmt"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +35,41 @@ func (ArticleApi) ArticleCreateView(c *gin.Context) {
 		res.FailWithMsg("用户不存在", c)
 		return
 	}
+
+	// 判断文章分类是不是自己创建的
+	var category models.CategoryModel
+	err = global.DB.Take(&category, "id = ? and user_id = ?", *cr.CategoryID, user.ID).Error
+	if err != nil {
+		res.FailWithMsg("文章分类不存在", c)
+		return
+	}
+
+	// 文章正文防止XSS攻击
+	contentDoc, err := goquery.NewDocumentFromReader(bytes.NewReader([]byte(cr.Content)))
+	if err != nil {
+		res.FailWithMsg("正文解析错误", c)
+		return
+	}
+	contentDoc.Find("script").Remove()
+	contentDoc.Find("image").Remove()
+	contentDoc.Find("iframe").Remove()
+	contentDoc.Find("video").Remove()
+	contentDoc.Find("audio").Remove()
+	cr.Content = contentDoc.Text()
+
+	// 如果不传简介，从正文中取前30个字符
+	if cr.Abstract == "" {
+		htmlStr := markdown.MdToHTML(cr.Content)
+		doc, err := goquery.NewDocumentFromReader(bytes.NewReader([]byte(htmlStr)))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		htmlText := doc.Text()
+		cr.Abstract = string([]rune(htmlText)[:200])
+	}
+
+	// 正文内容图片转存
 
 	article := models.ArticleModel{
 		Title:       cr.Title,
