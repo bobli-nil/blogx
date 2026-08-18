@@ -5,7 +5,6 @@ import (
 	"blogx_server/utils/date"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -90,19 +89,22 @@ func GetAllCacheCollect() (mps map[uint]int) {
 }
 
 func SetUserArticleHistoryCache(articleID uint, userID uint) {
-	key := fmt.Sprintf("history_%d_%d", articleID, userID)
-	now := time.Now()
+	key := fmt.Sprintf("history_%d", userID)
+	field := fmt.Sprintf("article_%d", articleID)
 	endTime := date.GetNowAfter()
-	subTime := endTime.Sub(now)
-	err := global.Redis.Set(key, "", subTime).Err()
-	if err != nil {
+	if err := global.Redis.HSet(key, field, "").Err(); err != nil {
+		logrus.Error(err)
+		return
+	}
+	if err := global.Redis.ExpireAt(key, endTime).Err(); err != nil {
 		logrus.Error(err)
 		return
 	}
 }
 
 func GetUserArticleHistoryCache(articleID uint, userID uint) bool {
-	key := fmt.Sprintf("%d_%d", articleID, userID)
-	err := global.Redis.Get(key).Err()
+	key := fmt.Sprintf("history_%d", userID)
+	field := fmt.Sprintf("article_%d", articleID)
+	err := global.Redis.HGet(key, field).Err()
 	return err == nil
 }
