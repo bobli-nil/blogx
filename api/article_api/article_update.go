@@ -9,10 +9,8 @@ import (
 	"blogx_server/models/enum"
 	"blogx_server/utils/jwt"
 	"blogx_server/utils/markdown"
-	"bytes"
-	"fmt"
+	"blogx_server/utils/xss"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
 )
 
@@ -55,28 +53,21 @@ func (ArticleApi) ArticleUpdateView(c *gin.Context) {
 	}
 
 	// 文章正文防止XSS攻击
-	contentDoc, err := goquery.NewDocumentFromReader(bytes.NewReader([]byte(cr.Content)))
+	newContent, err := xss.XssFilter(cr.Content)
 	if err != nil {
-		res.FailWithMsg("正文解析错误", c)
+		res.FailWithMsg(err.Error(), c)
 		return
 	}
-	contentDoc.Find("script").Remove()
-	contentDoc.Find("image").Remove()
-	contentDoc.Find("iframe").Remove()
-	contentDoc.Find("video").Remove()
-	contentDoc.Find("audio").Remove()
-	cr.Content = contentDoc.Text()
+	cr.Content = newContent
 
 	// 如果不传简介，从正文中取前30个字符
 	if cr.Abstract == "" {
-		htmlStr := markdown.MdToHTML(cr.Content)
-		doc, err := goquery.NewDocumentFromReader(bytes.NewReader([]byte(htmlStr)))
+		abs, err := markdown.ExtractContent(cr.Content, 200)
 		if err != nil {
-			fmt.Println(err)
+			res.FailWithMsg(err.Error(), c)
 			return
 		}
-		htmlText := doc.Text()
-		cr.Abstract = string([]rune(htmlText)[:200])
+		cr.Abstract = abs
 	}
 
 	// 要更新的数据

@@ -1,6 +1,9 @@
 package markdown
 
 import (
+	"bytes"
+
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
@@ -16,4 +19,17 @@ func MdToHTML(md string) string {
 	renderer := html.NewRenderer(opts)
 
 	return string(markdown.Render(doc, renderer))
+}
+
+func ExtractContent(content string, length int) (abs string, err error) {
+	htmlStr := MdToHTML(content)
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader([]byte(htmlStr)))
+	if err != nil {
+		return
+	}
+	htmlText := doc.Text()
+	if len(htmlText) > length {
+		abs = string([]rune(htmlText)[:length])
+	}
+	return
 }
