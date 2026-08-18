@@ -7,6 +7,7 @@ type CollectModel struct {
 	Cover        string    `gorm:"size:256" json:"cover"`    // 封面
 	ArticleCount int       `json:"articleCount"`             // 文章数量
 	UserID       uint      `json:"userId"`                   // 用户ID
+	IsDefault    bool      `json:"isDefault"`                // 是否是默认收藏夹
 	UserModel    UserModel `gorm:"foreignKey:UserID;references:ID" json:"-"`
 }
 
