@@ -35,6 +35,13 @@ func (ArticleApi) ArticleCreateView(c *gin.Context) {
 		return
 	}
 
+	if global.Conf.Site.SiteInfo.Mode == 2 {
+		if user.Role != enum.AdminRole {
+			res.FailWithMsg("博客模式下普通用户不能发布文章", c)
+			return
+		}
+	}
+
 	// 判断文章分类是不是自己创建的
 	var category models.CategoryModel
 	err = global.DB.Take(&category, "id = ? and user_id = ?", cr.CategoryID, user.ID).Error

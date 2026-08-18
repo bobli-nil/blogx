@@ -34,6 +34,13 @@ func (ArticleApi) ArticleUpdateView(c *gin.Context) {
 		return
 	}
 
+	if global.Conf.Site.SiteInfo.Mode == 2 {
+		if user.Role != enum.AdminRole {
+			res.FailWithMsg("博客模式下普通用户不能发布文章", c)
+			return
+		}
+	}
+
 	var article models.ArticleModel
 	if err = global.DB.Take(&article, cr.ID).Error; err != nil {
 		res.FailWithMsg("该文章不存在", c)
