@@ -16,4 +16,5 @@ func ArticleRouter(r *gin.RouterGroup) {
 	ar.GET("", middleware.BindQueryMiddleware[article_api.ArticleListRequest], articleApi.ArticleListView)
 	ar.PUT("", middleware.AuthMiddleware, middleware.BindJSONMiddleware[article_api.ArticleUpdateReq], articleApi.ArticleUpdateView)
 	ar.GET(":id", middleware.BindUriMiddleware[models.IDRequest], articleApi.ArticleDetailView)
+	ar.POST("examine", middleware.AdminMiddleware, middleware.BindJSONMiddleware[article_api.ArticleExamineRequest], articleApi.ArticleExamineView)
 }
