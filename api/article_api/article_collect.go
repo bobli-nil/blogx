@@ -82,6 +82,7 @@ func (ArticleApi) ArticleCollectView(c *gin.Context) {
 		res.FailWithMsg("取消收藏失败", c)
 		return
 	}
+	// TODO 收藏数同步缓存
 	global.DB.Model(&collectModel).Update("article_count", gorm.Expr("article_count - ?", 1))
 	res.OkWithMsg("取消收藏成功", c)
 	return
