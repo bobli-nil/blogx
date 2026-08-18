@@ -2,7 +2,12 @@ package redis_article
 
 import (
 	"blogx_server/global"
+	"blogx_server/utils/date"
+	"fmt"
 	"strconv"
+	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type ArticleCacheType string
@@ -82,4 +87,22 @@ func GetAllCacheDigg() (mps map[uint]int) {
 
 func GetAllCacheCollect() (mps map[uint]int) {
 	return getAll(articleCacheCollect)
+}
+
+func SetUserArticleHistoryCache(articleID uint, userID uint) {
+	key := fmt.Sprintf("history_%d_%d", articleID, userID)
+	now := time.Now()
+	endTime := date.GetNowAfter()
+	subTime := endTime.Sub(now)
+	err := global.Redis.Set(key, "", subTime).Err()
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+}
+
+func GetUserArticleHistoryCache(articleID uint, userID uint) bool {
+	key := fmt.Sprintf("%d_%d", articleID, userID)
+	err := global.Redis.Get(key).Err()
+	return err == nil
 }

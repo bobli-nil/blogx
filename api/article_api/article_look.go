@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type ArticleLookRequest struct {
@@ -35,7 +36,12 @@ func (ArticleApi) ArticleLookView(c *gin.Context) {
 		return
 	}
 
-	// TODO 这里要引入缓存
+	// 这里要引入缓存，如果改用户今天看过了这篇文章，直接返回，后面不用查表了
+	if redis_article.GetUserArticleHistoryCache(cr.ArticleID, cliams.UserID) {
+		res.OkWithMsg("成功", c)
+		logrus.Info("在缓存里")
+		return
+	}
 
 	// 查询今天有没有浏览过这个文章
 	var history models.UserArticleReadHistoryModel
@@ -61,6 +67,7 @@ func (ArticleApi) ArticleLookView(c *gin.Context) {
 
 	res.OkWithMsg("成功", c)
 	redis_article.SetCacheLook(cr.ArticleID, true)
+	redis_article.SetUserArticleHistoryCache(cr.ArticleID, cliams.UserID)
 	return
 
 }
