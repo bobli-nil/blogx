@@ -7,6 +7,7 @@ import (
 	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/service/redis_service/redis_article"
 	"blogx_server/utils/jwt"
 	"blogx_server/utils/sql"
 	"fmt"
@@ -65,7 +66,8 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 		}
 	}
 
-	if _, ok := orderColumnMap[cr.Order]; !ok {
+	_, ok := orderColumnMap[cr.Order]
+	if !ok && cr.Order != "" {
 		res.FailWithMsg("该字段不支持排序", c)
 		return
 	}
@@ -112,9 +114,16 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 		return
 	}
 
+	lookMap := redis_article.GetAllCacheLook()
+	diggMap := redis_article.GetAllCacheDigg()
+	collectMap := redis_article.GetAllCacheCollect()
+
 	var list = make([]ArticleListResponse, 0)
 	for _, model := range _list {
 		model.Content = ""
+		model.CollectCount = model.CollectCount + collectMap[model.ID]
+		model.LookCount = model.LookCount + lookMap[model.ID]
+		model.DiggCount = model.DiggCount + diggMap[model.ID]
 		list = append(list, ArticleListResponse{
 			ArticleModel: model,
 			UserTop:      userTopMap[model.ID],

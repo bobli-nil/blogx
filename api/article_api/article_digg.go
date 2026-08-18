@@ -6,6 +6,7 @@ import (
 	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/service/redis_service/redis_article"
 	"blogx_server/utils/jwt"
 	"fmt"
 
@@ -33,11 +34,13 @@ func (ArticleApi) ArticleDiggView(c *gin.Context) {
 			res.FailWithMsg("点赞失败", c)
 			return
 		}
+		redis_article.SetCacheDigg(cr.ID, true)
 		res.OkWithMsg("点赞成功", c)
 		return
 	}
 	fmt.Printf("%+v\n", articleDigg)
 	global.DB.Model(&models.ArticleDiggModel{}).Delete("article_id = ? and user_id = ?", articleDigg.ArticleID, articleDigg.UserID)
+	redis_article.SetCacheDigg(cr.ID, false)
 	res.OkWithMsg("取消点赞成功", c)
 	return
 }

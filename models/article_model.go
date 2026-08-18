@@ -16,10 +16,10 @@ type ArticleModel struct {
 	Cover        string             `gorm:"size:256" json:"cover"`
 	UserID       uint               `json:"userId"`
 	UserModel    UserModel          `gorm:"foreignKey:UserID;references:ID" json:"-"`
-	LookCount    uint               `json:"lookCount"`
-	DiggCount    uint               `json:"diggCount"`
-	CommentCount uint               `json:"commentCount"`
-	CollectCount uint               `json:"collectCount"`
+	LookCount    int                `json:"lookCount"`
+	DiggCount    int                `json:"diggCount"`
+	CommentCount int                `json:"commentCount"`
+	CollectCount int                `json:"collectCount"`
 	OpenComment  bool               `json:"openComment"`
 	Status       enum.ArticleStatus `json:"status"` // 状态：草稿 审核中 已发布
 }

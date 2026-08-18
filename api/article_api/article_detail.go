@@ -6,6 +6,7 @@ import (
 	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/service/redis_service/redis_article"
 	"blogx_server/utils/jwt"
 
 	"github.com/gin-gonic/gin"
@@ -46,7 +47,9 @@ func (ArticleApi) ArticleDetailView(c *gin.Context) {
 
 	// 管理员，能看所有人的所有文章
 
-	// TODO 从缓存里获取点赞数和浏览量
+	article.DiggCount = article.DiggCount + redis_article.GetCacheDigg(article.ID)
+	article.LookCount = article.LookCount + redis_article.GetCacheLook(article.ID)
+	article.CollectCount = article.CollectCount + redis_article.GetCacheCollect(article.ID)
 	res.OkWithData(ArticleDetailResponse{
 		ArticleModel: article,
 		Username:     article.UserModel.Username,

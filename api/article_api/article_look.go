@@ -6,6 +6,7 @@ import (
 	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/service/redis_service/redis_article"
 	"blogx_server/utils/jwt"
 	"time"
 
@@ -59,6 +60,7 @@ func (ArticleApi) ArticleLookView(c *gin.Context) {
 	}
 
 	res.OkWithMsg("成功", c)
+	redis_article.SetCacheLook(cr.ArticleID, true)
 	return
 
 }
