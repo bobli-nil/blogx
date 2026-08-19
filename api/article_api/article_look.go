@@ -80,12 +80,14 @@ type ArticleLookListRequest struct {
 }
 
 type ArticleLookListResponse struct {
-	ArticleID uint   `json:"articleID"`
-	Title     string `json:"title"`
-	Cover     string `json:"cover"`
-	Nickname  string `json:"nickname"`
-	Avatar    string `json:"avatar"`
-	UserID    uint   `json:"userID"`
+	ID        uint       `json:"id"`
+	CreatedAt *time.Time `json:"createAt"`
+	ArticleID uint       `json:"articleID"`
+	Title     string     `json:"title"`
+	Cover     string     `json:"cover"`
+	Nickname  string     `json:"nickname"`
+	Avatar    string     `json:"avatar"`
+	UserID    uint       `json:"userID"`
 }
 
 func (ArticleApi) ArticleLookListView(c *gin.Context) {
@@ -108,6 +110,8 @@ func (ArticleApi) ArticleLookListView(c *gin.Context) {
 	var list = make([]ArticleLookListResponse, 0)
 	for _, model := range _list {
 		list = append(list, ArticleLookListResponse{
+			ID:        model.ID,
+			CreatedAt: model.CreatedAt,
 			ArticleID: model.ArticleID,
 			Title:     model.ArticleModel.Title,
 			Cover:     model.ArticleModel.Cover,
