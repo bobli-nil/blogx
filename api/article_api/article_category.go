@@ -1,10 +1,12 @@
 package article_api
 
 import (
+	"blogx_server/common"
 	"blogx_server/common/res"
 	"blogx_server/global"
 	"blogx_server/middleware"
 	"blogx_server/models"
+	"blogx_server/models/enum"
 	"blogx_server/utils/jwt"
 
 	"github.com/gin-gonic/gin"
@@ -51,4 +53,66 @@ func (ArticleApi) ArticleCategoryCreate(c *gin.Context) {
 		return
 	}
 	res.OkWithMsg("更新分类成功", c)
+}
+
+type CategoryListRequest struct {
+	common.PageInfo
+	UserID uint  `form:"userID"`
+	Type   uint8 `form:"type" binding:"required,oneof=1 2 3"` // 1查自己 2查别人 3管理员
+}
+
+type CategoryListResponse struct {
+	models.CategoryModel
+	ArticleCount int    `json:"articleCount"`
+	Nickname     string `json:"nickname,omitempty"`
+	Avatar       string `json:"avatar,omitempty"`
+}
+
+func (ArticleApi) CategoryListView(c *gin.Context) {
+	cr := middleware.GetBind[CategoryListRequest](c)
+
+	preloads := []string{"ArticleList"}
+
+	switch cr.Type {
+	case 1:
+		claims, err := jwt.ParseTokenByGin(c)
+		if err != nil {
+			res.FailWithError(err, c)
+			return
+		}
+		cr.UserID = claims.UserID
+	case 2:
+	case 3:
+		claims, err := jwt.ParseTokenByGin(c)
+		if err != nil {
+			res.FailWithError(err, c)
+			return
+		}
+		if claims.Role != enum.AdminRole {
+			res.FailWithMsg("权限错误", c)
+			return
+		}
+		preloads = append(preloads, "UserModel")
+	}
+
+	_list, count, _ := common.ListQuery(models.CategoryModel{
+		UserID: cr.UserID,
+	}, common.Options{
+		Debug:    true,
+		PageInfo: cr.PageInfo,
+		Likes:    []string{"title"},
+		PreLoads: preloads,
+	})
+
+	list := make([]CategoryListResponse, 0)
+	for _, model := range _list {
+		list = append(list, CategoryListResponse{
+			CategoryModel: model,
+			ArticleCount:  len(model.ArticleList),
+			Nickname:      model.UserModel.Nickname,
+			Avatar:        model.UserModel.Avatar,
+		})
+	}
+
+	res.OkWithList(list, count, c)
 }
