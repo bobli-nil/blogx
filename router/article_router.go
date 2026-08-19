@@ -20,6 +20,7 @@ func ArticleRouter(r *gin.RouterGroup) {
 	ar.GET("digg/:id", middleware.AuthMiddleware, middleware.BindUriMiddleware[models.IDRequest], articleApi.ArticleDiggView)
 	ar.POST("collect", middleware.AuthMiddleware, middleware.BindJSONMiddleware[article_api.ArticleCollectRequest], articleApi.ArticleCollectView)
 	ar.POST("look", middleware.BindJSONMiddleware[article_api.ArticleLookRequest], articleApi.ArticleLookView)
+	ar.GET("history", middleware.AuthMiddleware, middleware.BindQueryMiddleware[article_api.ArticleLookListRequest], articleApi.ArticleLookListView)
 	ar.DELETE(":id", middleware.AuthMiddleware, middleware.BindUriMiddleware[models.IDRequest], articleApi.ArticleRemoveUserView)
 	ar.DELETE("", middleware.AdminMiddleware, middleware.BindJSONMiddleware[models.DeleteRequest], articleApi.ArticleRemoveView)
 }

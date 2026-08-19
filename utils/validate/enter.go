@@ -28,9 +28,20 @@ func init() {
 	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		label := fld.Tag.Get("label")
 		if label == "" {
-			return fld.Name
+			label = fld.Name
 		}
-		return label
+		// TODO 这里不是很理解，后面再看
+		name := fld.Tag.Get("json")
+		if name == "" {
+			name = fld.Tag.Get("form")
+		}
+		if label != "" {
+			return label
+		}
+		if name != "" {
+			return name
+		}
+		return ""
 	})
 }
 

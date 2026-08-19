@@ -1,6 +1,7 @@
 package article_api
 
 import (
+	"blogx_server/common"
 	"blogx_server/common/res"
 	"blogx_server/global"
 	"blogx_server/middleware"
@@ -70,4 +71,51 @@ func (ArticleApi) ArticleLookView(c *gin.Context) {
 	redis_article.SetUserArticleHistoryCache(cr.ArticleID, cliams.UserID)
 	return
 
+}
+
+type ArticleLookListRequest struct {
+	common.PageInfo
+	UserID uint `form:"userID"`
+	Type   int8 `form:"type" binding:"required,oneof=1 2"`
+}
+
+type ArticleLookListResponse struct {
+	ArticleID uint   `json:"articleID"`
+	Title     string `json:"title"`
+	Cover     string `json:"cover"`
+	Nickname  string `json:"nickname"`
+	Avatar    string `json:"avatar"`
+	UserID    uint   `json:"userID"`
+}
+
+func (ArticleApi) ArticleLookListView(c *gin.Context) {
+	cr := middleware.GetBind[ArticleLookListRequest](c)
+	claims := jwt.GetClaims(c)
+
+	switch cr.Type {
+	case 1:
+		cr.UserID = claims.UserID
+	}
+
+	_list, count, _ := common.ListQuery(models.UserArticleReadHistoryModel{
+		UserID: cr.UserID,
+	}, common.Options{
+		Debug:    true,
+		PageInfo: cr.PageInfo,
+		PreLoads: []string{"UserModel", "ArticleModel"},
+	})
+
+	var list = make([]ArticleLookListResponse, 0)
+	for _, model := range _list {
+		list = append(list, ArticleLookListResponse{
+			ArticleID: model.ArticleID,
+			Title:     model.ArticleModel.Title,
+			Cover:     model.ArticleModel.Cover,
+			Nickname:  model.UserModel.Nickname,
+			Avatar:    model.UserModel.Avatar,
+			UserID:    model.UserModel.ID,
+		})
+	}
+
+	res.OkWithList(list, count, c)
 }
