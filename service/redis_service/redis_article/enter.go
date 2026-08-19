@@ -26,15 +26,12 @@ func set(t ArticleCacheType, articleID uint, increase bool) {
 	}
 	global.Redis.HSet(string(t), strconv.Itoa(int(articleID)), num)
 }
-
 func SetCacheLook(articleID uint, increase bool) {
 	set(articleCacheLook, articleID, increase)
 }
-
 func SetCacheDigg(articleID uint, increase bool) {
 	set(articleCacheDigg, articleID, increase)
 }
-
 func SetCacheCollect(articleID uint, increase bool) {
 	set(articleCacheCollect, articleID, increase)
 }
@@ -43,15 +40,12 @@ func get(t ArticleCacheType, articleID uint) int {
 	num, _ := global.Redis.HGet(string(t), strconv.Itoa(int(articleID))).Int()
 	return num
 }
-
 func GetCacheLook(articleID uint) int {
 	return get(articleCacheLook, articleID)
 }
-
 func GetCacheDigg(articleID uint) int {
 	return get(articleCacheDigg, articleID)
 }
-
 func GetCacheCollect(articleID uint) int {
 	return get(articleCacheCollect, articleID)
 }
@@ -75,17 +69,21 @@ func getAll(t ArticleCacheType) (mps map[uint]int) {
 	}
 	return
 }
-
 func GetAllCacheLook() (mps map[uint]int) {
 	return getAll(articleCacheLook)
 }
-
 func GetAllCacheDigg() (mps map[uint]int) {
 	return getAll(articleCacheDigg)
 }
-
 func GetAllCacheCollect() (mps map[uint]int) {
 	return getAll(articleCacheCollect)
+}
+
+func Clear() {
+	err := global.Redis.Del("article_look_key", "article_digg_key", "article_collect_key").Err()
+	if err != nil {
+		logrus.Error(err)
+	}
 }
 
 func SetUserArticleHistoryCache(articleID uint, userID uint) {
@@ -101,7 +99,6 @@ func SetUserArticleHistoryCache(articleID uint, userID uint) {
 		return
 	}
 }
-
 func GetUserArticleHistoryCache(articleID uint, userID uint) bool {
 	key := fmt.Sprintf("history_%d", userID)
 	field := fmt.Sprintf("article_%d", articleID)
