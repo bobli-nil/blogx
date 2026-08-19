@@ -9,6 +9,7 @@ import (
 	"blogx_server/models/enum"
 	"blogx_server/service/redis_service/redis_article"
 	"blogx_server/utils/jwt"
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -122,4 +123,20 @@ func (ArticleApi) ArticleLookListView(c *gin.Context) {
 	}
 
 	res.OkWithList(list, count, c)
+}
+
+func (ArticleApi) ArticleLookRemoveView(c *gin.Context) {
+	cr := middleware.GetBind[models.DeleteRequest](c)
+	claims := jwt.GetClaims(c)
+
+	var list []models.UserArticleReadHistoryModel
+	global.DB.Find(&list, "user_id = ? and article_id in ?", claims.UserID, cr.IDList)
+	if len(list) > 0 {
+		if err := global.DB.Delete(&list).Error; err != nil {
+			res.FailWithMsg("足迹删除失败", c)
+			return
+		}
+	}
+
+	res.OkWithMsg(fmt.Sprintf("足迹删除成功 删除%d条", len(list)), c)
 }
