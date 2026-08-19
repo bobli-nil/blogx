@@ -8,6 +8,7 @@ import (
 	"blogx_server/models"
 	"blogx_server/models/enum"
 	"blogx_server/utils/jwt"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -115,4 +116,26 @@ func (ArticleApi) CategoryListView(c *gin.Context) {
 	}
 
 	res.OkWithList(list, count, c)
+}
+
+func (ArticleApi) CategoryRemoveView(c *gin.Context) {
+	cr := middleware.GetBind[models.DeleteRequest](c)
+	claims := jwt.GetClaims(c)
+
+	query := global.DB.Where("id in ?", cr.IDList)
+	if claims.Role != enum.AdminRole {
+		query = query.Where("user_id = ?", claims.UserID)
+	}
+
+	var categoryList []models.CategoryModel
+	global.DB.Where(query).Find(&categoryList)
+	if len(categoryList) > 0 {
+		if err := global.DB.Delete(&categoryList).Error; err != nil {
+			res.FailWithMsg(err.Error(), c)
+			return
+		}
+	}
+
+	msg := fmt.Sprintf("删除成功，成功删除%d条数据", len(categoryList))
+	res.OkWithMsg(msg, c)
 }
