@@ -1,0 +1,48 @@
+package comment_api
+
+import (
+	"blogx_server/common/res"
+	"blogx_server/global"
+	"blogx_server/middleware"
+	"blogx_server/models"
+	"blogx_server/models/enum"
+	"blogx_server/utils/jwt"
+
+	"github.com/gin-gonic/gin"
+)
+
+type CommentCreateRequest struct {
+	ArticleID uint   `json:"articleID" binding:"required"`
+	Content   string `json:"content" binding:"required"`
+	ParentID  *uint  `json:"parentID"`
+}
+
+func (CommentApi) CommentCreateView(c *gin.Context) {
+	cr := middleware.GetBind[CommentCreateRequest](c)
+	claims := jwt.GetClaims(c)
+
+	var article models.ArticleModel
+	err := global.DB.Take(&article, "id = ? and status = ?", cr.ArticleID, enum.ArticleStatusPublished).Error
+	if err != nil {
+		res.FailWithMsg("文章不存在", c)
+		return
+	}
+
+	// TODO 找根评论
+	if cr.ParentID == nil {
+	}
+
+	model := models.CommentModel{
+		ArticleID:    cr.ArticleID,
+		Content:      cr.Content,
+		UserID:       claims.UserID,
+		ParentID:     cr.ParentID,
+		RootParentID: nil,
+	}
+	err = global.DB.Debug().Create(&model).Error
+	if err != nil {
+		res.FailWithMsg("发布评论失败", c)
+		return
+	}
+	res.OkWithMsg("发布评论成功", c)
+}
