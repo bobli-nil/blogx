@@ -1,29 +1,48 @@
-package comment_service
+package main
 
 import (
+	"blogx_server/core"
+	"blogx_server/flags"
 	"blogx_server/global"
 	"blogx_server/models"
+	"encoding/json"
 	"fmt"
 )
 
-func GetRootComment(commentID uint) (model *models.CommentModel) {
-	var comment models.CommentModel
-	err := global.DB.Take(&comment, commentID).Error
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-	if comment.ParentID != nil {
-		return GetRootComment(*comment.ParentID)
-	}
-	return &comment
-}
+func main() {
+	// 解析命令行参数
+	flags.Parse()
+	// 读取配置文件
+	global.Conf = core.ReadConf()
+	// 日志配置初始化
+	core.InitLogrus()
+	global.DB = core.InitDB()
 
-func GetCommentTree(model *models.CommentModel) {
-	global.DB.Preload("SubCommentList").Take(&model)
-	for _, v := range model.SubCommentList {
-		GetCommentTree(v)
-	}
+	//model := models.CommentModel{
+	//	Model: models.Model{ID: 2},
+	//}
+	//GetCommentTree(&model)
+
+	//model := GetCommentTreeV2(2)
+
+	//for _, v1 := range model.SubCommentList {
+	//	fmt.Printf("--%d\n", v1.ID)
+	//	for _, v2 := range v1.SubCommentList {
+	//		fmt.Printf("----%d\n", v2.ID)
+	//		for _, v3 := range v2.SubCommentList {
+	//			fmt.Printf("------%d\n", v3.ID)
+	//		}
+	//	}
+	//}
+
+	//list := GetCommentOneDimensional(2)
+	//for _, model := range list[1:] {
+	//	fmt.Println(model.ID)
+	//}
+
+	res := GetCommentTreeV3(2)
+	bs, _ := json.Marshal(res)
+	fmt.Println(string(bs))
 }
 
 func GetCommentTreeV2(id uint) (model *models.CommentModel) {
@@ -36,6 +55,26 @@ func GetCommentTreeV2(id uint) (model *models.CommentModel) {
 		model.SubCommentList[i] = GetCommentTreeV2(model.SubCommentList[i].ID)
 	}
 
+	return
+}
+
+func GetCommentTree(model *models.CommentModel) {
+	global.DB.Preload("SubCommentList").Take(&model)
+	for _, v := range model.SubCommentList {
+		GetCommentTree(v)
+	}
+}
+
+func GetCommentOneDimensional(id uint) (list []models.CommentModel) {
+	model := models.CommentModel{
+		Model: models.Model{ID: id},
+	}
+	global.DB.Preload("SubCommentList").Take(&model)
+	list = append(list, model)
+	for _, commentModel := range model.SubCommentList {
+		subList := GetCommentOneDimensional(commentModel.ID)
+		list = append(list, subList...)
+	}
 	return
 }
 

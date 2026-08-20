@@ -6,6 +6,7 @@ import (
 	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/service/comment_service"
 	"blogx_server/utils/jwt"
 
 	"github.com/gin-gonic/gin"
@@ -28,18 +29,21 @@ func (CommentApi) CommentCreateView(c *gin.Context) {
 		return
 	}
 
-	// TODO 找根评论
-	if cr.ParentID == nil {
+	model := models.CommentModel{
+		ArticleID: cr.ArticleID,
+		Content:   cr.Content,
+		UserID:    claims.UserID,
+		ParentID:  cr.ParentID,
 	}
 
-	model := models.CommentModel{
-		ArticleID:    cr.ArticleID,
-		Content:      cr.Content,
-		UserID:       claims.UserID,
-		ParentID:     cr.ParentID,
-		RootParentID: nil,
+	if cr.ParentID != nil {
+		rootComment := comment_service.GetRootComment(*cr.ParentID)
+		if rootComment != nil {
+			model.RootParentID = &rootComment.ID
+		}
 	}
-	err = global.DB.Debug().Create(&model).Error
+
+	err = global.DB.Create(&model).Error
 	if err != nil {
 		res.FailWithMsg("发布评论失败", c)
 		return
