@@ -13,6 +13,7 @@ func SyncArticle() {
 	lookMap := redis_article.GetAllCacheLook()
 	diggMap := redis_article.GetAllCacheDigg()
 	collectMap := redis_article.GetAllCacheCollect()
+	commentMap := redis_article.GetAllCacheComment()
 
 	var list []models.ArticleModel
 	global.DB.Find(&list)
@@ -21,13 +22,15 @@ func SyncArticle() {
 		lookCount := lookMap[model.ID]
 		diggCount := diggMap[model.ID]
 		collectCount := collectMap[model.ID]
-		if lookCount == 0 && diggCount == 0 && collectCount == 0 {
+		commentCount := commentMap[model.ID]
+		if lookCount == 0 && diggCount == 0 && collectCount == 0 && commentCount == 0 {
 			continue
 		}
 		err := global.DB.Model(&model).Updates(map[string]any{
 			"look_count":    gorm.Expr("look_count + ?", lookCount),
 			"digg_count":    gorm.Expr("digg_count + ?", diggCount),
 			"collect_count": gorm.Expr("collect_count + ?", collectCount),
+			"comment_count": gorm.Expr("comment_count + ?", commentCount),
 		}).Error
 		if err != nil {
 			logrus.Errorf("%d 更新失败 %s", model.ID, err)
