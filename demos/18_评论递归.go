@@ -5,7 +5,6 @@ import (
 	"blogx_server/flags"
 	"blogx_server/global"
 	"blogx_server/models"
-	"encoding/json"
 	"fmt"
 )
 
@@ -40,9 +39,14 @@ func main() {
 	//	fmt.Println(model.ID)
 	//}
 
-	res := GetCommentTreeV3(2)
-	bs, _ := json.Marshal(res)
-	fmt.Println(string(bs))
+	//res := GetCommentTreeV3(2)
+	//bs, _ := json.Marshal(res)
+	//fmt.Println(string(bs))
+
+	list := GetParents(30)
+	for _, v := range list {
+		fmt.Println(v.ID)
+	}
 }
 
 func GetCommentTreeV2(id uint) (model *models.CommentModel) {
@@ -113,5 +117,18 @@ func GetCommentTreeV3(id uint) (res *CommentResponse) {
 		res.SubComments = append(res.SubComments, GetCommentTreeV3(commentModel.ID))
 	}
 
+	return
+}
+
+// GetParents 获取该评论所有的祖先评论
+func GetParents(commentID uint) (list []*models.CommentModel) {
+	var comment models.CommentModel
+	if err := global.DB.Take(&comment, commentID).Error; err != nil {
+		return
+	}
+	list = append(list, &comment)
+	if comment.ParentID != nil {
+		list = append(list, GetParents(*comment.ParentID)...)
+	}
 	return
 }

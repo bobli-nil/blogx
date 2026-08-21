@@ -26,7 +26,7 @@ func (CommentApi) CommentTreeView(c *gin.Context) {
 	global.DB.Where("article_id = ? and parent_id is null", article.ID).Find(&comments)
 	if len(comments) > 0 {
 		for _, comment := range comments {
-			list = append(list, comment_service.GetCommentTreeV3(comment.ID))
+			list = append(list, comment_service.GetCommentTreeV4(comment.ID))
 		}
 	}
 

@@ -38,10 +38,21 @@ func (CommentApi) CommentCreateView(c *gin.Context) {
 	}
 
 	if cr.ParentID != nil {
-		rootComment := comment_service.GetRootComment(*cr.ParentID)
-		if rootComment != nil {
-			model.RootParentID = &rootComment.ID
+		parentList := comment_service.GetParents(*cr.ParentID)
+		if len(parentList) >= global.Conf.Site.Article.CommentLine {
+			res.FailWithMsg("评论层级达到限制", c)
+			return
 		}
+
+		//rootComment := comment_service.GetRootComment(*cr.ParentID)
+		//if rootComment != nil {
+		//	model.RootParentID = &rootComment.ID
+		//}
+
+		if len(parentList) > 0 {
+			model.RootParentID = parentList[len(parentList)-1].ParentID
+		}
+
 	}
 
 	err = global.DB.Create(&model).Error

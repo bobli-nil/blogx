@@ -44,5 +44,6 @@ type IndexRight struct {
 }
 
 type Article struct {
-	NoExamine bool `yaml:"noExamine" json:"noExamine"`
+	NoExamine   bool `yaml:"noExamine" json:"noExamine"`
+	CommentLine int  `yaml:"commentLine" json:"commentLine"` // 评论的层级
 }

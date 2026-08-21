@@ -76,3 +76,48 @@ func GetCommentTreeV3(id uint) (res *CommentResponse) {
 
 	return
 }
+
+func GetCommentTreeV4(id uint) (res *CommentResponse) {
+	return getCommentTreeByLine(id, 1)
+}
+
+func getCommentTreeByLine(id uint, line int) (res *CommentResponse) {
+	model := models.CommentModel{
+		Model: models.Model{ID: id},
+	}
+	global.DB.Preload("UserModel").Preload("SubCommentList").Take(&model)
+
+	res = &CommentResponse{
+		ID:           model.ID,
+		Content:      model.Content,
+		UserID:       model.UserID,
+		UserNickname: model.UserModel.Nickname,
+		UserAvatar:   model.UserModel.Avatar,
+		ArticleID:    model.ArticleID,
+		ParentID:     model.ParentID,
+		DiggCount:    model.DiggCount,
+		ApplyCount:   0,
+		SubComments:  make([]*CommentResponse, 0),
+	}
+	if line >= global.Conf.Site.Article.CommentLine {
+		return
+	}
+	for _, commentModel := range model.SubCommentList {
+		res.SubComments = append(res.SubComments, getCommentTreeByLine(commentModel.ID, line+1))
+	}
+
+	return
+}
+
+// GetParents 获取该评论所有的祖先评论
+func GetParents(commentID uint) (list []*models.CommentModel) {
+	var comment models.CommentModel
+	if err := global.DB.Take(&comment, commentID).Error; err != nil {
+		return
+	}
+	list = append(list, &comment)
+	if comment.ParentID != nil {
+		list = append(list, GetParents(*comment.ParentID)...)
+	}
+	return
+}
