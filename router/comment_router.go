@@ -16,4 +16,5 @@ func CommentRouter(r *gin.RouterGroup) {
 	cr.GET("tree/:id", middleware.AuthMiddleware, middleware.BindUriMiddleware[models.IDRequest], commentApi.CommentTreeView)
 	cr.GET("", middleware.AuthMiddleware, middleware.BindQueryMiddleware[comment_api.CommentListRequest], commentApi.CommentListView)
 	cr.DELETE(":id", middleware.AuthMiddleware, middleware.BindUriMiddleware[models.IDRequest], commentApi.CommentRemoveView)
+	cr.GET("digg/:id", middleware.AuthMiddleware, middleware.BindUriMiddleware[models.IDRequest], commentApi.CommentDiggView)
 }

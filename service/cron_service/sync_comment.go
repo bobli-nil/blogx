@@ -10,6 +10,7 @@ import (
 )
 
 func SyncComment() {
+	// 同步评论回复数
 	mps := redis_comment.GetAllCacheApply()
 	keys := GetKeys(mps)
 	var comments []models.CommentModel
@@ -24,6 +25,22 @@ func SyncComment() {
 			logrus.Infof("%d 评论回复数同步成功", comment.ID)
 		}
 	}
+	// 同步评论点赞数
+	mps1 := redis_comment.GetAllCacheDigg()
+	keys1 := GetKeys(mps1)
+	var comments1 []models.CommentModel
+	global.DB.Find(&comments1, "id in ?", keys1)
+	if len(comments1) > 0 {
+		for _, comment := range comments1 {
+			err := global.DB.Model(&comment).Update("digg_count", gorm.Expr("digg_count + ?", mps1[comment.ID])).Error
+			if err != nil {
+				logrus.Error(err)
+				continue
+			}
+			logrus.Infof("%d 评论点赞数同步成功", comment.ID)
+		}
+	}
+
 	redis_comment.Clear()
 }
 

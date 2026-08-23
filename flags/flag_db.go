@@ -23,6 +23,7 @@ func FlagDB() {
 		&models.LogModel{},
 		&models.ImageModel{},
 		&models.UserLoginModel{},
+		&models.UserCommentDiggModel{},
 	)
 	if err != nil {
 		logrus.Errorf("数据库迁移失败 %s", err)
