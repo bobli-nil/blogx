@@ -122,3 +122,16 @@ func GetParents(commentID uint) (list []*models.CommentModel) {
 	}
 	return
 }
+
+func GetCommentOneDimensional(id uint) (list []models.CommentModel) {
+	model := models.CommentModel{
+		Model: models.Model{ID: id},
+	}
+	global.DB.Preload("SubCommentList").Take(&model)
+	list = append(list, model)
+	for _, commentModel := range model.SubCommentList {
+		subList := GetCommentOneDimensional(commentModel.ID)
+		list = append(list, subList...)
+	}
+	return
+}
