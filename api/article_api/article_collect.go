@@ -8,6 +8,7 @@ import (
 	"blogx_server/models/enum"
 	"blogx_server/service/redis_service/redis_article"
 	"blogx_server/utils/jwt"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -88,4 +89,19 @@ func (ArticleApi) ArticleCollectView(c *gin.Context) {
 	res.OkWithMsg("取消收藏成功", c)
 	redis_article.SetCacheCollect(cr.ArticleID, false)
 	return
+}
+
+func (ArticleApi) ArticleCollectPatchRemove(c *gin.Context) {
+	cr := middleware.GetBind[models.DeleteRequest](c)
+	claims := jwt.GetClaims(c)
+
+	var collectArticleList []models.UserArticleCollectModel
+	global.DB.Find(&collectArticleList, "id in ? and user_id = ?", cr.IDList, claims.UserID)
+
+	if len(collectArticleList) > 0 {
+		global.DB.Delete(&collectArticleList)
+	}
+
+	msg := fmt.Sprintf("批量移除文章%d篇", len(collectArticleList))
+	res.OkWithMsg(msg, c)
 }
