@@ -29,3 +29,21 @@ func GenerateRandomDigitsSimple(length int) string {
 	}
 	return string(result)
 }
+
+func Unique[T comparable](list []T) []T {
+	size := len(list)
+	if size == 0 {
+		return []T{}
+	}
+	mp := make(map[T]bool)
+	for _, v := range list {
+		if _, ok := mp[v]; !ok {
+			mp[v] = true
+		}
+	}
+	newSlice := make([]T, 0)
+	for key, _ := range mp {
+		newSlice = append(newSlice, key)
+	}
+	return newSlice
+}
