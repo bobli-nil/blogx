@@ -14,5 +14,9 @@ func Cron() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
+	_, err = crontab.AddFunc("* * 3 * * *", SyncComment)
+	if err != nil {
+		logrus.Fatal(err)
+	}
 	crontab.Start()
 }

@@ -3,6 +3,7 @@ package comment_service
 import (
 	"blogx_server/global"
 	"blogx_server/models"
+	"blogx_server/service/redis_service/redis_comment"
 	"fmt"
 )
 
@@ -48,7 +49,7 @@ type CommentResponse struct {
 	ArticleID    uint               `json:"articleID"`
 	ParentID     *uint              `json:"parentID"`
 	DiggCount    int                `json:"diggCount"`   // 点赞数
-	ApplyCount   uint               `json:"applyCount"`  // 回复数
+	ApplyCount   int                `json:"applyCount"`  // 回复数
 	SubComments  []*CommentResponse `json:"subComments"` // 子评论
 }
 
@@ -96,7 +97,7 @@ func getCommentTreeByLine(id uint, line int) (res *CommentResponse) {
 		ArticleID:    model.ArticleID,
 		ParentID:     model.ParentID,
 		DiggCount:    model.DiggCount,
-		ApplyCount:   0,
+		ApplyCount:   redis_comment.GetCacheApply(model.ID),
 		SubComments:  make([]*CommentResponse, 0),
 	}
 	if line >= global.Conf.Site.Article.CommentLine {

@@ -11,7 +11,8 @@ type CommentModel struct {
 	ParentModel    *CommentModel   `gorm:"foreignKey:ParentID;references:ID" json:"-"`
 	RootParentID   *uint           `json:"rootParentId"` // 根评论
 	SubCommentList []*CommentModel `gorm:"foreignKey:ParentID;references:ID" json:"-"`
-	DiggCount      int             `json:"diggCount"` // 评论点赞数
+	DiggCount      int             `json:"diggCount"`  // 评论点赞数
+	ApplyCount     int             `json:"applyCount"` // 评论回复数
 }
 
 func (CommentModel) TableName() string {
