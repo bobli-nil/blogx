@@ -21,6 +21,7 @@ type ArticleListRequest struct {
 	UserID     uint               `form:"userID"`
 	CategoryID *uint              `form:"categoryID"`
 	Status     enum.ArticleStatus `form:"status" binding:"oneof=1 2 3"`
+	CollectID  uint               `form:"collectID"`
 }
 
 type ArticleListResponse struct {
@@ -49,11 +50,24 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 	switch cr.Type {
 	case 1:
 		// 查别人，用户参数就是必填的
-		if cr.Type == 0 {
+		if cr.UserID == 0 {
 			res.FailWithMsg("用户ID必填", c)
 			return
 		}
 		cr.Status = 0
+		cr.Order = ""
+		if cr.CollectID != 0 {
+			var userConf models.UserConfModel
+			err := global.DB.Take(&userConf, "user_id = ?", cr.UserID).Error
+			if err != nil {
+				res.FailWithMsg("用户不存在", c)
+				return
+			}
+			if !userConf.OpenCollect {
+				res.FailWithMsg("用户未开启我的收藏", c)
+				return
+			}
+		}
 	case 2:
 		claims, err := jwt.ParseTokenByGin(c)
 		if err != nil {
