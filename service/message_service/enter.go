@@ -80,3 +80,20 @@ func InsertDiggCommentMessage(model models.UserCommentDiggModel) {
 		logrus.Error(err)
 	}
 }
+
+// InsertCollectArticleMessage 收藏文章的消息
+func InsertCollectArticleMessage(model models.UserArticleCollectModel) {
+	global.DB.Preload("UserModel").Preload("ArticleModel").Take(&model)
+	err := global.DB.Create(&models.MessageModel{
+		Type:               message_type_enum.CollectArticleType,
+		RevUserID:          model.ArticleModel.UserID,
+		ActionUserID:       model.UserID,
+		ActionUserNickname: model.UserModel.Nickname,
+		ActionUserAvatar:   model.UserModel.Avatar,
+		ArticleID:          model.ArticleID,
+		ArticleTitle:       model.ArticleModel.Title,
+	}).Error
+	if err != nil {
+		logrus.Error(err)
+	}
+}
