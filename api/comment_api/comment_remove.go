@@ -7,6 +7,7 @@ import (
 	"blogx_server/models"
 	"blogx_server/models/enum"
 	"blogx_server/service/comment_service"
+	"blogx_server/service/message_service"
 	"blogx_server/service/redis_service/redis_comment"
 	"blogx_server/utils/jwt"
 	"fmt"
@@ -31,7 +32,16 @@ func (CommentApi) CommentRemoveView(c *gin.Context) {
 			res.FailWithMsg("权限错误", c)
 			return
 		}
+	} else {
+		// 如果是管理员删除就发一条通知
+		message_service.InsertSystemMessage(
+			comment.UserID,
+			"管理员删除了你的评论",
+			fmt.Sprintf("%s 该评论不符合社区规范", comment.Content),
+			"",
+			"")
 	}
+
 	// 找所有子评论（包括自己）删除，找所有父评论更新回复数
 	subList := comment_service.GetCommentOneDimensional(comment.ID)
 	if comment.ParentID != nil {

@@ -5,6 +5,7 @@ import (
 	"blogx_server/global"
 	"blogx_server/middleware"
 	"blogx_server/models"
+	"blogx_server/service/message_service"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,14 @@ func (ArticleApi) ArticleRemoveView(c *gin.Context) {
 	global.DB.Find(&list, "id in ?", cr.IDList)
 
 	if len(list) > 0 {
+		for _, model := range list {
+			message_service.InsertSystemMessage(
+				model.UserID,
+				"管理员删除了你的文章",
+				fmt.Sprintf("%s 文章不符合社区规范", model.Title),
+				"",
+				"")
+		}
 		err := global.DB.Delete(&list).Error
 		if err != nil {
 			res.FailWithMsg("删除失败", c)

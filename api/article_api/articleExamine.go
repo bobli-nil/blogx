@@ -6,6 +6,8 @@ import (
 	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/service/message_service"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +29,13 @@ func (ArticleApi) ArticleExamineView(c *gin.Context) {
 
 	global.DB.Model(&article).Update("status", cr.Status)
 
-	// TODO 给文章发布人一个系统通知
+	switch cr.Status {
+	case 3:
+		// TODO 这里的跳转地址看前端
+		message_service.InsertSystemMessage(article.UserID, "管理员审核了你的文章", "审核通过", article.Title, "")
+	case 4:
+		message_service.InsertSystemMessage(article.UserID, "管理员审核了你的文章", fmt.Sprintf("审核不通过，原因：%s", cr.Msg), article.Title, "")
+	}
 
 	res.OkWithData(article, c)
 }
