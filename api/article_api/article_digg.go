@@ -6,6 +6,7 @@ import (
 	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/service/message_service"
 	"blogx_server/service/redis_service/redis_article"
 	"blogx_server/utils/jwt"
 	"fmt"
@@ -35,6 +36,7 @@ func (ArticleApi) ArticleDiggView(c *gin.Context) {
 			return
 		}
 		redis_article.SetCacheDigg(cr.ID, true)
+		message_service.InsertDiggArticleMessage(articleDigg)
 		res.OkWithMsg("点赞成功", c)
 		return
 	}
