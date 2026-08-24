@@ -12,16 +12,19 @@ func Struct2Map(data any, t string) (mp map[string]any) {
 		fieldType := typ.Field(i)
 		tagValue := fieldType.Tag.Get(t)
 
-		if tagValue == "" {
+		if tagValue == "" || tagValue == "-" {
 			continue
 		}
-		if tagValue == "-" {
-			continue
+
+		kind := fieldVal.Kind()
+		if kind == reflect.Ptr || kind == reflect.Slice || kind == reflect.Map ||
+			kind == reflect.Chan || kind == reflect.Func || kind == reflect.Interface {
+			if fieldVal.IsNil() {
+				continue
+			}
 		}
-		if fieldVal.IsNil() {
-			continue
-		}
-		if fieldVal.Kind() == reflect.Ptr {
+
+		if kind == reflect.Ptr {
 			mp[tagValue] = fieldVal.Elem().Interface()
 		} else {
 			mp[tagValue] = fieldVal.Interface()

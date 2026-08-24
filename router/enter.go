@@ -27,6 +27,7 @@ func Run() {
 	UserRouter(nr)
 	ArticleRouter(nr)
 	CommentRouter(nr)
+	SiteMsgRouter(nr)
 
 	addr := global.Conf.System.Addr()
 	r.Run(addr)

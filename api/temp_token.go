@@ -12,12 +12,21 @@ func GenerateTempToken(r *gin.Engine) {
 	r.GET("token/:role", func(c *gin.Context) {
 		userType := c.Param("role")
 
-		var userID uint = 1
-		var userName = "zhangsan"
-		var role = enum.AdminRole
-		if userType == "common" {
+		var userID uint
+		var userName string
+		var role enum.RoleType
+		switch userType {
+		case "admin":
+			userID = 1
+			userName = "zhangsan"
+			role = enum.AdminRole
+		case "common":
 			userID = 2
 			userName = "lisi"
+			role = enum.UserRole
+		case "wangwu":
+			userID = 6
+			userName = "wangwu"
 			role = enum.UserRole
 		}
 

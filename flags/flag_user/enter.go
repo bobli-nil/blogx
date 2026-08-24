@@ -79,14 +79,6 @@ func (User) Create() {
 			fmt.Println("创建用户失败")
 			return err
 		}
-		userConf := models.UserConfModel{
-			UserID:             user.ID,
-			UpdateUsernameDate: user.CreatedAt,
-		}
-		if err := global.DB.Create(&userConf).Error; err != nil {
-			fmt.Println("创建用户失败")
-			return err
-		}
 		return nil
 	})
 	if err != nil {
