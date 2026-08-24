@@ -26,3 +26,22 @@ func InsertCommentMessage(model models.CommentModel) {
 		logrus.Error(err)
 	}
 }
+
+// InsertApplyMessage 插入一条评论回复消息
+func InsertApplyMessage(model models.CommentModel) {
+	global.DB.Preload("ParentModel").Preload("UserModel").Preload("ArticleModel").Take(&model)
+	err := global.DB.Create(&models.MessageModel{
+		Type:               message_type_enum.ApplyType,
+		RevUserID:          model.ParentModel.UserID,
+		ActionUserID:       model.UserID,
+		ActionUserNickname: model.UserModel.Nickname,
+		ActionUserAvatar:   model.UserModel.Avatar,
+		Content:            model.Content,
+		ArticleID:          model.ArticleID,
+		ArticleTitle:       model.ArticleModel.Title,
+		CommentID:          model.ID,
+	}).Error
+	if err != nil {
+		logrus.Error(err)
+	}
+}

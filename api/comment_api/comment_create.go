@@ -51,6 +51,11 @@ func (CommentApi) CommentCreateView(c *gin.Context) {
 			for _, commentModel := range parentList {
 				redis_comment.SetCacheApply(commentModel.ID, 1)
 			}
+
+			// 回复评论时新增一条消息,因为此事子评论还没创建，所以要用defer
+			defer func() {
+				go message_service.InsertApplyMessage(model)
+			}()
 		}
 
 	}
