@@ -3,7 +3,7 @@ package models
 import (
 	"blogx_server/service/redis_service/redis_article"
 
-	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type UserArticleCollectModel struct {
@@ -20,7 +20,7 @@ func (UserArticleCollectModel) TableName() string {
 	return "user_article_collect"
 }
 
-func (u UserArticleCollectModel) BeforeDelete(c *gin.Context) {
+func (u UserArticleCollectModel) BeforeDelete(tx *gorm.DB) error {
 	redis_article.SetCacheCollect(u.ArticleID, false)
-	return
+	return nil
 }
