@@ -5,6 +5,7 @@ import (
 	"blogx_server/global"
 	"blogx_server/middleware"
 	"blogx_server/models"
+	"blogx_server/service/message_service"
 	"blogx_server/service/redis_service/redis_comment"
 	"blogx_server/utils/jwt"
 
@@ -33,7 +34,7 @@ func (CommentApi) CommentDiggView(c *gin.Context) {
 			return
 		}
 		redis_comment.SetCacheDigg(cr.ID, 1)
-
+		message_service.InsertDiggCommentMessage(commentDigg)
 		res.OkWithMsg("点赞成功", c)
 		return
 	}
