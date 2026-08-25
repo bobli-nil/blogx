@@ -39,7 +39,11 @@ func (CommentApi) CommentDiggView(c *gin.Context) {
 		return
 	}
 	// 点过就删除
-	global.DB.Model(&models.UserCommentDiggModel{}).Delete("comment_id = ? and user_id = ?", commentDigg.CommentID, commentDigg.UserID)
+	err := global.DB.Model(&models.UserCommentDiggModel{}).Debug().Delete(&commentDigg).Error
+	if err != nil {
+		res.FailWithMsg(err.Error(), c)
+		return
+	}
 	redis_comment.SetCacheDigg(cr.ID, -1)
 	res.OkWithMsg("取消点赞成功", c)
 	return
