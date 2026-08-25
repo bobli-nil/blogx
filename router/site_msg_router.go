@@ -11,6 +11,7 @@ import (
 func SiteMsgRouter(r *gin.RouterGroup) {
 	sr := r.Group("site_msg")
 	siteMsgApi := api.App.SiteMsgApi
+	sr.GET("", middleware.AuthMiddleware, middleware.BindQueryMiddleware[site_msg_api.SiteMsgListRequest], siteMsgApi.SiteMsgListView)
 	sr.GET("conf", middleware.AuthMiddleware, siteMsgApi.UserMessageConfView)
 	sr.PUT("conf", middleware.AuthMiddleware, middleware.BindJSONMiddleware[site_msg_api.UserMessageConfRequest], siteMsgApi.UserMessageConfUpdateView)
 }
