@@ -13,6 +13,7 @@ func SiteMsgRouter(r *gin.RouterGroup) {
 	siteMsgApi := api.App.SiteMsgApi
 	sr.GET("", middleware.AuthMiddleware, middleware.BindQueryMiddleware[site_msg_api.SiteMsgListRequest], siteMsgApi.SiteMsgListView)
 	sr.POST("", middleware.AuthMiddleware, middleware.BindJSONMiddleware[site_msg_api.SiteMsgReadRequest], siteMsgApi.SiteMsgReadView)
+	sr.DELETE("", middleware.AuthMiddleware, middleware.BindJSONMiddleware[site_msg_api.SiteMessageRemoveRequest], siteMsgApi.SiteMessageRemoveView)
 	sr.GET("conf", middleware.AuthMiddleware, siteMsgApi.UserMessageConfView)
 	sr.PUT("conf", middleware.AuthMiddleware, middleware.BindJSONMiddleware[site_msg_api.UserMessageConfRequest], siteMsgApi.UserMessageConfUpdateView)
 }
