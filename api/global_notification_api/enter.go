@@ -8,6 +8,7 @@ import (
 	"blogx_server/models"
 	"blogx_server/models/enum"
 	"blogx_server/utils/jwt"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +26,7 @@ func (GlobalNotificationApi) CreateView(c *gin.Context) {
 	cr := middleware.GetBind[CreateRequest](c)
 
 	var model models.GlobalNotificationModel
-	if err := global.DB.Take(&model, "title = ?", cr.Title).Error; err != nil {
+	if err := global.DB.Take(&model, "title = ?", cr.Title).Error; err == nil {
 		res.FailWithMsg("全局消息名称重复", c)
 		return
 	}
@@ -68,11 +69,17 @@ func (GlobalNotificationApi) ListView(c *gin.Context) {
 		global.DB.Model(&models.UserGlobalNotificationModel{}).Find(&userGlobalNotificationList, "user_id = ?", claims.UserID)
 		if len(userGlobalNotificationList) > 0 {
 			for _, model := range userGlobalNotificationList {
-				readMsgMap[model.NotificationID] = model.IsRead
-				deletedIDList = append(deletedIDList, model.NotificationID)
+				if model.IsDelete {
+					deletedIDList = append(deletedIDList, model.NotificationID)
+				}
+				if model.IsRead {
+					readMsgMap[model.NotificationID] = true
+				}
 			}
 		}
-		query.Where("id not in ?", deletedIDList)
+		if len(deletedIDList) > 0 {
+			query.Where("id not in ?", deletedIDList)
+		}
 	case 2:
 		if claims.Role != enum.AdminRole {
 			res.FailWithMsg("权限错误", c)
@@ -84,6 +91,7 @@ func (GlobalNotificationApi) ListView(c *gin.Context) {
 		PageInfo: cr.PageInfo,
 		Likes:    []string{"title", "content"},
 		Where:    query,
+		Debug:    true,
 	})
 
 	list := make([]ListResponse, 0)
@@ -95,4 +103,65 @@ func (GlobalNotificationApi) ListView(c *gin.Context) {
 	}
 
 	res.OkWithList(list, count, c)
+}
+
+func (GlobalNotificationApi) RemoveAdminView(c *gin.Context) {
+	cr := middleware.GetBind[models.DeleteRequest](c)
+
+	var list []models.GlobalNotificationModel
+	global.DB.Find(&list, "id in ?", cr.IDList)
+	if len(list) > 0 {
+		global.DB.Delete(&list)
+	}
+
+	msg := fmt.Sprintf("删除%d条全局消息，成功删除%d条", len(cr.IDList), len(list))
+	res.OkWithMsg(msg, c)
+}
+
+type UserMsgActionRequest struct {
+	ID   uint `json:"id" binding:"required"`
+	Type int8 `json:"type" binding:"required,oneof=1 2"` // 1读取 2删除
+}
+
+func (GlobalNotificationApi) UserMsgActionView(c *gin.Context) {
+	cr := middleware.GetBind[UserMsgActionRequest](c)
+	claims := jwt.GetClaims(c)
+
+	var msg models.GlobalNotificationModel
+	if err := global.DB.Take(&msg, "id = ?", cr.ID).Error; err != nil {
+		res.FailWithMsg("消息不存在", c)
+		return
+	}
+
+	var ugnm models.UserGlobalNotificationModel
+	err := global.DB.Take(&ugnm, "notification_id = ? and user_id = ?", cr.ID, claims.UserID).Error
+	if err != nil {
+		model := models.UserGlobalNotificationModel{
+			NotificationID: cr.ID,
+			UserID:         claims.UserID,
+		}
+		if cr.Type == 1 {
+			model.IsRead = true
+		} else {
+			model.IsDelete = true
+		}
+		global.DB.Create(&model)
+		res.OkWithMsg("消息读取成功", c)
+		return
+	}
+	if ugnm.IsDelete {
+		res.OkWithMsg("消息已删除", c)
+		return
+	}
+	if cr.Type == 1 {
+		global.DB.Model(&ugnm).Update("is_read", true)
+		res.OkWithMsg("消息读取成功", c)
+		return
+	}
+	if cr.Type == 2 {
+		global.DB.Model(&ugnm).Update("is_delete", true)
+		res.OkWithMsg("消息删除成功", c)
+		return
+	}
+
 }
