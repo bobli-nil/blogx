@@ -28,6 +28,7 @@ func FlagDB() {
 		&models.UserMessageConfModel{},
 		&models.GlobalNotificationModel{},
 		&models.UserGlobalNotificationModel{},
+		&models.UserFocusModel{},
 	)
 	if err != nil {
 		logrus.Errorf("数据库迁移失败 %s", err)
