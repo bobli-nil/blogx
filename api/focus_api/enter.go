@@ -7,6 +7,7 @@ import (
 	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/utils/jwt"
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -90,12 +91,25 @@ func (FocusApi) FocusUserListView(c *gin.Context) {
 		}
 	}
 
+	query := global.DB.Where("")
+	if cr.Keyword != "" {
+		var userIDList []uint
+		global.DB.Model(&models.UserModel{}).
+			Where("nickname like ?", fmt.Sprintf("%%%s%%", cr.Keyword)).
+			Select("id").
+			Scan(&userIDList)
+		if len(userIDList) > 0 {
+			query.Where("focus_user_id in ?", userIDList)
+		}
+	}
+
 	_list, count, _ := common.ListQuery(models.UserFocusModel{
 		FocusUserID: cr.FocusUserID,
 		UserID:      cr.UserID,
 	}, common.Options{
 		PageInfo: cr.PageInfo,
 		PreLoads: []string{"FocusUserModel"},
+		Where:    query,
 	})
 
 	var list = make([]FocusUserListResponse, 0)
@@ -149,12 +163,25 @@ func (FocusApi) FansUserListView(c *gin.Context) {
 		}
 	}
 
+	query := global.DB.Where("")
+	if cr.Keyword != "" {
+		var userIDList []uint
+		global.DB.Model(&models.UserModel{}).
+			Where("nickname like ?", fmt.Sprintf("%%%s%%", cr.Keyword)).
+			Select("id").
+			Scan(&userIDList)
+		if len(userIDList) > 0 {
+			query.Where("user_id in ?", userIDList)
+		}
+	}
+
 	_list, count, _ := common.ListQuery(models.UserFocusModel{
 		FocusUserID: cr.UserID,
 		UserID:      cr.FansUserID,
 	}, common.Options{
 		PageInfo: cr.PageInfo,
 		PreLoads: []string{"UserModel"},
+		Where:    query,
 	})
 
 	var list = make([]FansUserListResponse, 0)
