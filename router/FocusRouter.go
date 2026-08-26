@@ -13,5 +13,7 @@ func FocusRouter(r *gin.RouterGroup) {
 	focusApi := api.App.FocusApi
 
 	fr.POST("", middleware.AuthMiddleware, middleware.BindJSONMiddleware[focus_api.FocusUserRequest], focusApi.FocusUserView)
-	fr.GET("my_focus", middleware.AuthMiddleware, middleware.BindQueryMiddleware[focus_api.FocusUserListRequest], focusApi.FocusUserListView)
+	fr.DELETE("", middleware.AuthMiddleware, middleware.BindJSONMiddleware[focus_api.FocusUserRequest], focusApi.UnfocusUserView)
+	fr.GET("my_focus", middleware.BindQueryMiddleware[focus_api.FocusUserListRequest], focusApi.FocusUserListView)
+	fr.GET("my_fans", middleware.BindQueryMiddleware[focus_api.FansUserListRequest], focusApi.FansUserListView)
 }
