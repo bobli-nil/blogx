@@ -8,3 +8,17 @@ const (
 	RelationFans     Relation = 3
 	RelationFriend   Relation = 4
 )
+
+func (r Relation) String() string {
+	switch r {
+	case RelationStranger:
+		return "Stranger"
+	case RelationFocus:
+		return "Focus"
+	case RelationFans:
+		return "Fans"
+	case RelationFriend:
+		return "Friend"
+	}
+	return "Unknown"
+}
