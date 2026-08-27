@@ -30,6 +30,7 @@ func Run() {
 	SiteMsgRouter(nr)
 	GlobalNotificationRouter(nr)
 	FocusRouter(nr)
+	ChatRouter(nr)
 
 	addr := global.Conf.System.Addr()
 	r.Run(addr)
