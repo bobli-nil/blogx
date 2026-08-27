@@ -37,6 +37,12 @@ func (ChatApi) ChatListView(c *gin.Context) {
 	cr.Order = "created_at desc"
 
 	var deletedIDList []uint
+	var userChatActionList []models.UserChatActionModel
+	var chatReadMap = map[uint]bool{}
+	global.DB.Find(&userChatActionList, "user_id = ? and (is_delete = ? or is_delete is null)", cr.RevUserID, 0)
+	for _, model := range userChatActionList {
+		chatReadMap[model.ChatID] = true
+	}
 
 	switch cr.Type {
 	case 1:
@@ -78,6 +84,7 @@ func (ChatApi) ChatListView(c *gin.Context) {
 			SendUserAvatar:   model.SendUserModel.Avatar,
 			RevUserNickname:  model.RevUserModel.Nickname,
 			RevUserAvatar:    model.RevUserModel.Avatar,
+			IsRead:           chatReadMap[model.ID],
 		}
 		if claims.UserID == model.SendUserID {
 			item.IsMe = true
