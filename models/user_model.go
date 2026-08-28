@@ -24,6 +24,10 @@ type UserModel struct {
 	Address        string              `gorm:"size:128" json:"address"`
 }
 
+func (u UserModel) GetID() uint {
+	return u.ID
+}
+
 func (*UserModel) TableName() string {
 	return "user"
 }
