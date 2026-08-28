@@ -25,6 +25,6 @@ func main() {
 
 	//chat_service.ToTextChat(1, 2, "在干嘛")
 	//chat_service.ToTextChat(2, 1, "在吃饭")
-	chat_service.ToTextChat(1, 3, "Hi")
-	chat_service.ToTextChat(3, 2, "你好")
+	chat_service.ToTextChat(2, 3, "你咋不说话")
+	chat_service.ToTextChat(3, 2, "说什么")
 }
