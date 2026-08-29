@@ -10,11 +10,11 @@ import (
 func Cron() {
 	timezone, _ := time.LoadLocation("Asia/Shanghai")
 	crontab := cron.New(cron.WithSeconds(), cron.WithLocation(timezone))
-	_, err := crontab.AddFunc("* * 2 * * *", SyncArticle)
+	_, err := crontab.AddFunc("0 0 2 * * *", SyncArticle)
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	_, err = crontab.AddFunc("* * 3 * * *", SyncComment)
+	_, err = crontab.AddFunc("0 0 3 * * *", SyncComment)
 	if err != nil {
 		logrus.Fatal(err)
 	}
