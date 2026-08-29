@@ -40,13 +40,20 @@ func (ChatApi) ChatView(c *gin.Context) {
 		return
 	}
 
+	// 发送者用户信息
+	userID := claims.UserID
+	var user models.UserModel
+	if err := global.DB.Take(&user, userID).Error; err != nil {
+		res.FailWithMsg("用户不存在", c)
+		return
+	}
+
 	conn, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		logrus.Errorf("ws 升级失败 %s", err)
 		return
 	}
 
-	userID := claims.UserID
 	addr := conn.RemoteAddr().String()
 	addrMap, ok := onlineMap[userID]
 	if !ok {
@@ -85,22 +92,30 @@ func (ChatApi) ChatView(c *gin.Context) {
 		}
 
 		// 消息入库
+		model := models.ChatModel{
+			SendUserID: claims.UserID,
+			RevUserID:  req.RevUserID,
+			MsgType:    req.MsgType,
+			Msg:        req.Msg,
+		}
+		if err := global.DB.Create(&model).Error; err != nil {
+			res.SendConnFailWithMsg("消息发送失败", conn)
+			continue
+		}
 
 		// 发送消息给接收人revUserID
 		data := ChatResponse{
 			ChatListResponse: ChatListResponse{
-				ChatModel: models.ChatModel{
-					MsgType: req.MsgType,
-					Msg:     req.Msg,
-				},
+				ChatModel:        model,
+				SendUserNickname: user.Nickname,
+				SendUserAvatar:   user.Avatar,
+				RevUserNickname:  revUser.Nickname,
+				RevUserAvatar:    revUser.Avatar,
 			},
 		}
-		res.SendWsMsg(onlineMap, req.RevUserID, res.Response{
-			Code: res.SuccessCode,
-			Msg:  res.SuccessCode.String(),
-			Data: data,
-		})
+		res.SendWsMsg(onlineMap, req.RevUserID, data)
 		// 给自己也发一份
+		data.IsMe = true
 		res.SendConnOkWithMsg(data, conn)
 	}
 
