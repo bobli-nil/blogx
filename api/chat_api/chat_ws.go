@@ -2,7 +2,12 @@ package chat_api
 
 import (
 	"blogx_server/common/res"
+	"blogx_server/global"
+	"blogx_server/models"
+	"blogx_server/models/ctype"
+	"blogx_server/models/enum/chat_msg_type"
 	"blogx_server/utils/jwt"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -15,6 +20,15 @@ var upGrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
+}
+
+type ChatRequest struct {
+	RevUserID uint                  `json:"revUserID"`
+	MsgType   chat_msg_type.MsgType `json:"msgType"` // 1文本 2图片 3md
+	Msg       ctype.ChatMsg         `json:"msg"`
+}
+type ChatResponse struct {
+	ChatListResponse
 }
 
 var onlineMap = map[uint]map[string]*websocket.Conn{}
@@ -48,18 +62,46 @@ func (ChatApi) ChatView(c *gin.Context) {
 	fmt.Println("进入后", onlineMap)
 
 	for {
-		msgType, msg, err := conn.ReadMessage()
+		// 读取消息
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			logrus.Errorf("读取消息失败 %s", err)
 			break
 		}
-		fmt.Println("收到的消息", msg, msgType)
 
-		err = conn.WriteMessage(1, []byte("你好"))
+		// 获取请求参数
+		var req ChatRequest
+		err = json.Unmarshal(msg, &req)
 		if err != nil {
-			logrus.Errorf("发动消息失败 %s", err)
-			break
+			res.SendConnFailWithMsg("参数错误", conn)
+			continue
 		}
+
+		// 判断接收人在不在
+		var revUser models.UserModel
+		if err := global.DB.Take(&revUser, req.RevUserID).Error; err != nil {
+			res.SendConnFailWithMsg("接收人不存在", conn)
+			continue
+		}
+
+		// 消息入库
+
+		// 发送消息给接收人revUserID
+		data := ChatResponse{
+			ChatListResponse: ChatListResponse{
+				ChatModel: models.ChatModel{
+					MsgType: req.MsgType,
+					Msg:     req.Msg,
+				},
+			},
+		}
+		res.SendWsMsg(onlineMap, req.RevUserID, res.Response{
+			Code: res.SuccessCode,
+			Msg:  res.SuccessCode.String(),
+			Data: data,
+		})
+		// 给自己也发一份
+		res.SendConnOkWithMsg(data, conn)
 	}
 
 	defer conn.Close()
