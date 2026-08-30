@@ -1,6 +1,7 @@
 package site_msg_api
 
 import (
+	"blogx_server/common"
 	"blogx_server/common/res"
 	"blogx_server/global"
 	"blogx_server/models"
@@ -34,7 +35,23 @@ func (SiteMsgApi) UserMsgView(c *gin.Context) {
 		}
 	}
 
-	// TODO 未读的私信
+	// 未读的私信，接收人是我chat且不在user_chat_action这张表里的
+	var chatList []models.ChatModel
+	var chatIDList []uint
+	global.DB.Find(&chatList, "rev_user_id = ?", claims.UserID)
+	for _, chat := range chatList {
+		chatIDList = append(chatIDList, chat.ID)
+	}
+	userAcMap := common.ScanMapV2(models.UserChatActionModel{}, common.ScanOption{
+		Key:   "ChatID",
+		Where: global.DB.Where("chat_id in ?", chatIDList),
+	})
+	for _, model := range chatList {
+		_, ok := userAcMap[model.ID]
+		if !ok {
+			data.PrivateMsgCount++
+		}
+	}
 
 	// 算未读的全局消息
 	var userReadIDList []uint
