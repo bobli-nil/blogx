@@ -25,7 +25,7 @@ func GenerateTempToken(r *gin.Engine) {
 			userName = "lisi"
 			role = enum.UserRole
 		case "wangwu":
-			userID = 6
+			userID = 3
 			userName = "wangwu"
 			role = enum.UserRole
 		}

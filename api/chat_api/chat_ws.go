@@ -6,7 +6,10 @@ import (
 	"blogx_server/models"
 	"blogx_server/models/ctype"
 	"blogx_server/models/enum/chat_msg_type"
+	"blogx_server/models/enum/relationship_enum"
+	"blogx_server/service/focus_service"
 	"blogx_server/utils/jwt"
+	"blogx_server/utils/xss"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -89,6 +92,71 @@ func (ChatApi) ChatView(c *gin.Context) {
 		if err := global.DB.Take(&revUser, req.RevUserID).Error; err != nil {
 			res.SendConnFailWithMsg("接收人不存在", conn)
 			continue
+		}
+
+		// 具体的消息类型要做处理
+		switch req.MsgType {
+		case chat_msg_type.TextMsgType:
+			if req.Msg.TextMsg == nil || req.Msg.TextMsg.Content == "" {
+				res.SendConnFailWithMsg("文本消息内容为空", conn)
+				continue
+			}
+		case chat_msg_type.ImageMsgType:
+			if req.Msg.ImageMsg == nil || req.Msg.ImageMsg.Src == "" {
+				res.SendConnFailWithMsg("图片消息内容为空", conn)
+				continue
+			}
+		case chat_msg_type.MarkdownMsgType:
+			if req.Msg.MarkdownMsg == nil || req.Msg.MarkdownMsg.Content == "" {
+				res.SendConnFailWithMsg("Markdown消息内容为空", conn)
+				continue
+			}
+			content, err := xss.XssFilter(req.Msg.MarkdownMsg.Content)
+			if err != nil {
+				res.SendConnFailWithMsg("Markdown内容XSS处理失败", conn)
+				continue
+			}
+			req.Msg.MarkdownMsg.Content = content
+		default:
+			res.SendConnFailWithMsg("不支持的消息类型", conn)
+			continue
+		}
+
+		// 判断发送人和接收人关系
+		relation := focus_service.CalcUserRelationship(userID, revUser.ID)
+		fmt.Println("好友关系", relation.String())
+		switch relation {
+		case relationship_enum.RelationStranger:
+			var revUserMsgConf models.UserMessageConfModel
+			if err := global.DB.Take(&revUserMsgConf, "user_id = ?", revUser.ID).Error; err != nil {
+				res.SendConnFailWithMsg("接收人隐私设置不存在", conn)
+				continue
+			}
+			if !revUserMsgConf.OpenPrivateChat {
+				res.SendConnFailWithMsg("对方未开启陌生人私聊", conn)
+				continue
+			}
+		case relationship_enum.RelationFriend:
+		case relationship_enum.RelationFocus, relationship_enum.RelationFans:
+			// 今天对方没有回复，那么你就只能发一条
+			var chatList []models.ChatModel
+			global.DB.
+				Find(&chatList, "date(created_at) = date(now()) and ((send_user_id = ? and rev_user_id = ?) or (send_user_id = ? and rev_user_id = ?))", userID, revUser.ID, revUser.ID, userID)
+			var sendChatCount, revUserCount int
+			for _, model := range chatList {
+				if model.SendUserID == userID {
+					sendChatCount++
+				}
+				if model.RevUserID == userID {
+					revUserCount++
+				}
+			}
+			fmt.Printf("chatList %v \n", chatList)
+			fmt.Printf("%d %d \n", sendChatCount, revUserCount)
+			if sendChatCount > 0 && revUserCount == 0 {
+				res.SendConnFailWithMsg("对方未回复，今天只能发送一条消息", conn)
+				continue
+			}
 		}
 
 		// 消息入库
