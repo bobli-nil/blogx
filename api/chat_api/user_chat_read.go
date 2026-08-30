@@ -5,6 +5,8 @@ import (
 	"blogx_server/global"
 	"blogx_server/middleware"
 	"blogx_server/models"
+	"blogx_server/models/ctype"
+	"blogx_server/models/enum/chat_msg_type"
 	"blogx_server/utils/jwt"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +22,19 @@ func (ChatApi) ChatReadView(c *gin.Context) {
 		return
 	}
 
+	item := ChatResponse{
+		ChatListResponse: ChatListResponse{
+			ChatModel: models.ChatModel{
+				MsgType: chat_msg_type.MsgReadType,
+				Msg: ctype.ChatMsg{
+					MsgReadMsg: &ctype.MsgReadMsg{
+						ReadChatID: chat.ID,
+					},
+				},
+			},
+		},
+	}
+
 	var chatAc models.UserChatActionModel
 	err := global.DB.Take(&chatAc, "user_id = ? and chat_id = ?", claims.UserID, chat.ID).Error
 	if err != nil {
@@ -28,6 +43,7 @@ func (ChatApi) ChatReadView(c *gin.Context) {
 			ChatID: cr.ID,
 			IsRead: true,
 		})
+		res.SendWsMsg(OnlineMap, chat.SendUserID, item)
 		res.OkWithMsg("消息读取成功", c)
 		return
 	}

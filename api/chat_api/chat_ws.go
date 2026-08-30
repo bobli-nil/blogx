@@ -34,7 +34,7 @@ type ChatResponse struct {
 	ChatListResponse
 }
 
-var onlineMap = map[uint]map[string]*websocket.Conn{}
+var OnlineMap = map[uint]map[string]*websocket.Conn{}
 
 func (ChatApi) ChatView(c *gin.Context) {
 	claims, err := jwt.ParseTokenByGin(c)
@@ -58,9 +58,9 @@ func (ChatApi) ChatView(c *gin.Context) {
 	}
 
 	addr := conn.RemoteAddr().String()
-	addrMap, ok := onlineMap[userID]
+	addrMap, ok := OnlineMap[userID]
 	if !ok {
-		onlineMap[userID] = map[string]*websocket.Conn{
+		OnlineMap[userID] = map[string]*websocket.Conn{
 			addr: conn,
 		}
 	} else {
@@ -69,7 +69,7 @@ func (ChatApi) ChatView(c *gin.Context) {
 			addrMap[addr] = conn
 		}
 	}
-	fmt.Println("进入后", onlineMap)
+	fmt.Println("进入后", OnlineMap)
 
 	for {
 		// 读取消息
@@ -181,7 +181,7 @@ func (ChatApi) ChatView(c *gin.Context) {
 				RevUserAvatar:    revUser.Avatar,
 			},
 		}
-		res.SendWsMsg(onlineMap, req.RevUserID, data)
+		res.SendWsMsg(OnlineMap, req.RevUserID, data)
 		// 给自己也发一份
 		data.IsMe = true
 		res.SendConnOkWithMsg(data, conn)
@@ -190,15 +190,15 @@ func (ChatApi) ChatView(c *gin.Context) {
 	defer conn.Close()
 
 	// 关闭
-	addrMap2, ok2 := onlineMap[userID]
+	addrMap2, ok2 := OnlineMap[userID]
 	if ok2 {
 		_, ok := addrMap2[addr]
 		if ok {
 			delete(addrMap2, addr)
 		}
 		if len(addrMap2) == 0 {
-			delete(onlineMap, userID)
+			delete(OnlineMap, userID)
 		}
 	}
-	fmt.Println("关闭", onlineMap)
+	fmt.Println("关闭", OnlineMap)
 }
