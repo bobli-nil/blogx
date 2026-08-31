@@ -7,6 +7,7 @@ import (
 	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/models/enum"
+	"blogx_server/service/redis_service/redis_article"
 	"blogx_server/utils/jwt"
 	"blogx_server/utils/sql"
 	"context"
@@ -51,6 +52,11 @@ func (SearchApi) ArticleSearchView(c *gin.Context) {
 	sortKey := sortMap[cr.Type]
 	if sortKey == "" {
 		res.FailWithMsg("搜索类型错误", c)
+		return
+	}
+
+	if global.ESClient == nil {
+		// 服务降级
 		return
 	}
 
@@ -165,8 +171,19 @@ func (SearchApi) ArticleSearchView(c *gin.Context) {
 		DefaultOrder: sql.ConvertSliceOrderSql(articleIDList),
 	})
 
+	lookMap := redis_article.GetAllCacheLook()
+	diggMap := redis_article.GetAllCacheDigg()
+	collectMap := redis_article.GetAllCacheCollect()
+	commentMap := redis_article.GetAllCacheComment()
+
 	list := make([]ArticleListResponse, 0)
 	for _, model := range _list {
+		model.Content = ""
+		model.CollectCount = model.CollectCount + collectMap[model.ID]
+		model.LookCount = model.LookCount + lookMap[model.ID]
+		model.DiggCount = model.DiggCount + diggMap[model.ID]
+		model.CommentCount = model.CommentCount + commentMap[model.ID]
+
 		item := ArticleListResponse{
 			ArticleModel: model,
 			AdminTop:     articleTopMap[model.ID],
