@@ -70,7 +70,7 @@ site:
   indexRight:
     list: []
   article:
-    noExamine: false
+    noExamine: true
     commentLine: 3
 email:
   domain: smtp.qq.com

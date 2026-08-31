@@ -4,6 +4,7 @@ import (
 	"blogx_server/global"
 	"blogx_server/models/ctype"
 	"blogx_server/models/enum"
+	"blogx_server/service/text_service"
 	_ "embed"
 
 	"github.com/sirupsen/logrus"
@@ -67,5 +68,43 @@ func (a ArticleModel) BeforeDelete(tx *gorm.DB) error {
 	logrus.Infof("删除关联置顶 %d 条", len(topList))
 	logrus.Infof("删除关联浏览 %d 条", len(lookList))
 
+	return nil
+}
+
+func (a ArticleModel) AfterCreate(tx *gorm.DB) error {
+	// 只有发布的文章才会放到全文搜索里
+	if a.Status != enum.ArticleStatusPublished {
+		return nil
+	}
+	textList := text_service.MdContentTransformation(a.ID, a.Title, a.Content)
+	var list []TextModel
+	for _, model := range textList {
+		list = append(list, TextModel{
+			ArticleID: model.ArticleID,
+			Head:      model.Head,
+			Body:      model.Body,
+		})
+	}
+
+	if err := tx.Create(&list).Error; err != nil {
+		logrus.Error(err)
+	}
+	return nil
+}
+
+func (a ArticleModel) AfterDelete(tx *gorm.DB) error {
+	var textList []TextModel
+	tx.Find(&textList, "article_id = ?", a.ID)
+	if len(textList) > 0 {
+		logrus.Infof("产出全文记录%d条", len(textList))
+		tx.Delete(&textList)
+	}
+	return nil
+}
+
+func (a ArticleModel) AfterUpdate(tx *gorm.DB) error {
+	// 把记录删除，再重新添加
+	a.AfterDelete(tx)
+	a.AfterCreate(tx)
 	return nil
 }

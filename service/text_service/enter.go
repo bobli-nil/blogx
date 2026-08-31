@@ -1,18 +1,23 @@
 package text_service
 
 import (
-	"blogx_server/models"
 	"fmt"
 	"strings"
 )
 
-func MdContentTransformation(model models.ArticleModel) (list []models.TextModel) {
-	lines := strings.Split(model.Content, "\n")
+type TextModel struct {
+	ArticleID uint   `json:"articleID"`
+	Head      string `json:"head"`
+	Body      string `json:"body"`
+}
+
+func MdContentTransformation(id uint, title, content string) (list []TextModel) {
+	lines := strings.Split(content, "\n")
 
 	var headList []string
 	var bodyList []string
 	var body string
-	headList = append(headList, model.Title)
+	headList = append(headList, title)
 	var flag bool
 	for _, line := range lines {
 		if strings.HasPrefix(line, "```") {
@@ -39,8 +44,8 @@ func MdContentTransformation(model models.ArticleModel) (list []models.TextModel
 	}
 
 	for i := 0; i < len(headList); i++ {
-		list = append(list, models.TextModel{
-			ArticleID: model.ID,
+		list = append(list, TextModel{
+			ArticleID: id,
 			Head:      headList[i],
 			Body:      bodyList[i],
 		})
