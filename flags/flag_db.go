@@ -31,6 +31,7 @@ func FlagDB() {
 		&models.UserFocusModel{},
 		&models.ChatModel{},
 		&models.UserChatActionModel{},
+		&models.TextModel{}, // 全文搜索表
 	)
 	if err != nil {
 		logrus.Errorf("数据库迁移失败 %s", err)
