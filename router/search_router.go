@@ -11,4 +11,5 @@ import (
 func SearchRouter(r *gin.RouterGroup) {
 	searchApi := api.App.SearchApi
 	r.GET("article/search", middleware.BindQueryMiddleware[search_api.ArticleSearchRequest], searchApi.ArticleSearchView)
+	r.GET("text/search", middleware.BindQueryMiddleware[search_api.TextSearchRequest], searchApi.TextSearchView)
 }
