@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -59,15 +58,8 @@ type ChatResponse struct {
 
 const baseUrl = "https://api.chatanywhere.tech/v1/chat/completions"
 
-func Chat(content string) (msg string, err error) {
+func BaseRequest(r Request) (res *http.Response, err error) {
 	method := "POST"
-	r := Request{
-		Model: "gpt-5.4-mini",
-		Messages: []Message{
-			Message{Role: "system", Content: "你是blogx的文章分析AI"},
-			Message{Role: "user", Content: content},
-		},
-	}
 	byteData, _ := json.Marshal(r)
 	req, err := http.NewRequest(method, baseUrl, bytes.NewBuffer(byteData))
 	if err != nil {
@@ -77,25 +69,6 @@ func Chat(content string) (msg string, err error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", global.Conf.Ai.SecretKey))
 
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		logrus.Errorf("请求失败 %s", err)
-		return
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	var response ChatResponse
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		logrus.Errorf("解析失败 %s %s", err, string(body))
-		return
-	}
-	msg = response.Choices[0].Message.Content
+	res, err = http.DefaultClient.Do(req)
 	return
 }
