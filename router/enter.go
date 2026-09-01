@@ -32,6 +32,7 @@ func Run() {
 	FocusRouter(nr)
 	ChatRouter(nr)
 	SearchRouter(nr)
+	AiRouter(nr)
 
 	addr := global.Conf.System.Addr()
 	r.Run(addr)

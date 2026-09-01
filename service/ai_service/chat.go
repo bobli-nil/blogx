@@ -1,17 +1,21 @@
 package ai_service
 
 import (
+	_ "embed"
 	"encoding/json"
 	"io"
 
 	"github.com/sirupsen/logrus"
 )
 
+//go:embed chat.prompt
+var prompt string
+
 func Chat(content string) (msg string, err error) {
 	r := Request{
 		Model: "gpt-5.4-mini",
 		Messages: []Message{
-			Message{Role: "system", Content: "AI"},
+			Message{Role: "system", Content: prompt},
 			Message{Role: "user", Content: content},
 		},
 	}

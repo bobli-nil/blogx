@@ -4,6 +4,7 @@ import (
 	"blogx_server/core"
 	"blogx_server/flags"
 	"blogx_server/global"
+	"blogx_server/service/ai_service"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,10 +13,14 @@ import (
 func main() {
 	flags.Parse()
 	global.Conf = core.ReadConf()
-	GeModelList()
+	//GeModelList()
 
-	//msg, err := ai_service.Chat("你好")
-	//fmt.Println(msg, err)
+	msg, err := ai_service.Chat("# 标题1\r\n正文\r\n内容3\r\n内容4\r\n# 标题2\r\n```python\r\n# 注释\r\nprintf(\"python\")\r\n```")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(msg)
 
 	//msgChan, err := ai_service.ChatStream("你好")
 	//if err != nil {
