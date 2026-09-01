@@ -96,6 +96,6 @@ qiNiu:
   expiry: 60
 ai:
   enable: true
-  secretKey: ""
+  secretKey: sk-IuH6bN7IhGx1lC1dq7bIdgPkDJDUviOGZKB4fDqJMdNH6NXz
   nickname: ""
   avatar: ""
