@@ -13,6 +13,7 @@ func SiteRouter(r *gin.RouterGroup) {
 	sr.Use(middleware.AuthMiddleware)
 
 	sr.GET("qq_url", siteApi.SiteInfoQQView)
+	sr.GET("ai_info", siteApi.SiteInfoAiView)
 	sr.GET(":name", siteApi.SiteInfoView)
 	sr.PUT(":name", middleware.AdminMiddleware, siteApi.SiteUpdateView)
 }

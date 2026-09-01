@@ -74,6 +74,22 @@ func (s *SiteApi) SiteInfoQQView(c *gin.Context) {
 	res.OkWithData(global.Conf.QQ.Url(), c)
 }
 
+type AiResponse struct {
+	Enable   bool   `json:"enable"`
+	Nickname string `json:"nickname"`
+	Avatar   string `json:"avatar"`
+	Abstract string `json:"abstract"`
+}
+
+func (s *SiteApi) SiteInfoAiView(c *gin.Context) {
+	res.OkWithData(AiResponse{
+		Enable:   global.Conf.Ai.Enable,
+		Nickname: global.Conf.Ai.Nickname,
+		Avatar:   global.Conf.Ai.Avatar,
+		Abstract: global.Conf.Ai.Abstract,
+	}, c)
+}
+
 type SiteUpdateReq struct {
 	Name string `json:"name" binding:"required" label:"名称"`
 }

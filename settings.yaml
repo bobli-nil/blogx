@@ -97,5 +97,6 @@ qiNiu:
 ai:
   enable: true
   secretKey: sk-IuH6bN7IhGx1lC1dq7bIdgPkDJDUviOGZKB4fDqJMdNH6NXz
-  nickname: ""
+  nickname: "AI小管家"
   avatar: ""
+  abstract: "Hello，我是你的AI小管家，我可以根据你的描述在本站找到你喜欢的文章，赶紧来试试吧"
