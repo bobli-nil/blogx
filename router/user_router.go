@@ -15,6 +15,7 @@ func UserRouter(c *gin.RouterGroup) {
 	ur.POST("email", middleware.EmailVerifyMiddleware, userApi.RegisterEmailView)
 	ur.POST("pwd_login", middleware.CaptchaMiddleware, userApi.PwdLogin)
 	ur.GET("detail", middleware.AuthMiddleware, userApi.UserDetailView)
+	ur.GET("", middleware.AdminMiddleware, middleware.BindQueryMiddleware[user_api.UserListRequest], userApi.UserListView)
 	ur.GET("base", userApi.UserBaseInfoView)
 	ur.GET("login_list", middleware.AuthMiddleware, userApi.UserLoginList)
 	ur.PUT("update_password", middleware.AuthMiddleware, userApi.UpdatePassword)
