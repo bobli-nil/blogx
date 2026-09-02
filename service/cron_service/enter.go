@@ -4,19 +4,13 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
-	"github.com/sirupsen/logrus"
 )
 
 func Cron() {
 	timezone, _ := time.LoadLocation("Asia/Shanghai")
 	crontab := cron.New(cron.WithSeconds(), cron.WithLocation(timezone))
-	_, err := crontab.AddFunc("0 0 2 * * *", SyncArticle)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	_, err = crontab.AddFunc("0 0 3 * * *", SyncComment)
-	if err != nil {
-		logrus.Fatal(err)
-	}
+	crontab.AddFunc("0 0 2 * * *", SyncArticle)
+	crontab.AddFunc("0 0 3 * * *", SyncComment)
+	crontab.AddFunc("0 59 23 * * *", SyncSiteFlow)
 	crontab.Start()
 }

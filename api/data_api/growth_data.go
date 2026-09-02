@@ -36,6 +36,16 @@ func (DataApi) GrowthData(c *gin.Context) {
 
 	switch cr.Type {
 	case 1:
+		global.DB.Debug().
+			Model(&models.SiteFlowModel{}).
+			Where(
+				"created_at >= ? and created_at <= ?",
+				before7.Format("2006-01-02")+" 00:00:00",
+				now.Format("2006-01-02 15:04:05"),
+			).
+			Select("DATE_FORMAT(created_at, '%Y-%m-%d') as date", "sum(count) as count").
+			Group("date").
+			Scan(&dataList)
 	case 2:
 		global.DB.
 			Debug().
