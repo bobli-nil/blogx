@@ -14,16 +14,17 @@ import (
 
 type ArticleDetailResponse struct {
 	models.ArticleModel
-	Username string `json:"username"`
-	Nickname string `json:"nickname"`
-	Avatar   string `json:"avatar"`
+	Username      string `json:"username"`
+	Nickname      string `json:"nickname"`
+	Avatar        string `json:"avatar"`
+	CategoryTitle string `json:"categoryTitle"`
 }
 
 func (ArticleApi) ArticleDetailView(c *gin.Context) {
 	cr := middleware.GetBind[models.IDRequest](c)
 
 	var article models.ArticleModel
-	if err := global.DB.Preload("UserModel").Take(&article, cr.ID).Error; err != nil {
+	if err := global.DB.Preload("UserModel").Preload("CategoryModel").Take(&article, cr.ID).Error; err != nil {
 		res.FailWithMsg("文章不存在", c)
 		return
 	}
@@ -51,10 +52,17 @@ func (ArticleApi) ArticleDetailView(c *gin.Context) {
 	article.LookCount = article.LookCount + redis_article.GetCacheLook(article.ID)
 	article.CollectCount = article.CollectCount + redis_article.GetCacheCollect(article.ID)
 	article.CommentCount = article.CommentCount + redis_article.GetCacheComment(article.ID)
-	res.OkWithData(ArticleDetailResponse{
+
+	// TODO 增加CategoryTitle这个功能未测试
+	data := ArticleDetailResponse{
 		ArticleModel: article,
 		Username:     article.UserModel.Username,
 		Nickname:     article.UserModel.Nickname,
 		Avatar:       article.UserModel.Avatar,
-	}, c)
+	}
+	if article.CategoryModel != nil {
+		data.CategoryTitle = article.CategoryModel.Title
+	}
+
+	res.OkWithData(data, c)
 }
