@@ -22,6 +22,15 @@ type SiteInfoRequest struct {
 	Name string `uri:"name"`
 }
 
+type QiNiu struct {
+	Enable bool `json:"enable"`
+}
+
+type SiteInfoResponse struct {
+	QiNiu QiNiu `json:"qiNiu"`
+	conf.Site
+}
+
 func (s *SiteApi) SiteInfoView(c *gin.Context) {
 	cr := SiteInfoRequest{}
 	err := c.ShouldBindUri(&cr)
@@ -32,7 +41,13 @@ func (s *SiteApi) SiteInfoView(c *gin.Context) {
 
 	if cr.Name == "site" {
 		global.Conf.Site.About.Version = global.Version
-		res.OkWithData(global.Conf.Site, c)
+		//res.OkWithData(global.Conf.Site, c)
+		res.OkWithData(SiteInfoResponse{
+			Site: global.Conf.Site,
+			QiNiu: QiNiu{
+				Enable: global.Conf.QiNiu.Enable,
+			},
+		}, c)
 		return
 	}
 
