@@ -12,5 +12,6 @@ func Cron() {
 	crontab.AddFunc("0 0 2 * * *", SyncArticle)
 	crontab.AddFunc("0 0 3 * * *", SyncComment)
 	crontab.AddFunc("0 59 23 * * *", SyncSiteFlow)
+	crontab.AddFunc("0 30 2 * * *", SyncUser)
 	crontab.Start()
 }
