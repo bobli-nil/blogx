@@ -67,8 +67,9 @@ func (ArticleApi) CollectCreate(c *gin.Context) {
 
 type CollectListRequest struct {
 	common.PageInfo
-	UserID uint  `form:"userID"`
-	Type   uint8 `form:"type" binding:"required,oneof=1 2 3"` // 1查自己 2查别人 3管理员
+	UserID    uint  `form:"userID"`
+	Type      uint8 `form:"type" binding:"required,oneof=1 2 3"` // 1查自己 2查别人 3管理员
+	ArticleID uint  `form:"articleID"`                           // 如果传了，就判断这个文章在哪个收藏夹里
 }
 
 type CollectListResponse struct {
@@ -76,6 +77,7 @@ type CollectListResponse struct {
 	ArticleCount int    `json:"articleCount"`
 	Nickname     string `json:"nickname,omitempty"`
 	Avatar       string `json:"avatar,omitempty"`
+	ArticleIn    bool   `json:"articleIn,omitempty"`
 }
 
 func (ArticleApi) CollectListView(c *gin.Context) {
@@ -127,12 +129,19 @@ func (ArticleApi) CollectListView(c *gin.Context) {
 
 	list := make([]CollectListResponse, 0)
 	for _, model := range _list {
-		list = append(list, CollectListResponse{
+		item := CollectListResponse{
 			CollectModel: model,
 			ArticleCount: len(model.ArticleList),
 			Nickname:     model.UserModel.Nickname,
 			Avatar:       model.UserModel.Avatar,
-		})
+		}
+		for _, articleModel := range model.ArticleList {
+			if articleModel.ArticleID == cr.ArticleID {
+				item.ArticleIn = true
+				break
+			}
+		}
+		list = append(list, item)
 	}
 
 	res.OkWithList(list, count, c)
