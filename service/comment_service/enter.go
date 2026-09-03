@@ -3,6 +3,7 @@ package comment_service
 import (
 	"blogx_server/global"
 	"blogx_server/models"
+	"blogx_server/models/enum/relationship_enum"
 	"blogx_server/service/redis_service/redis_comment"
 	"fmt"
 )
@@ -41,16 +42,18 @@ func GetCommentTreeV2(id uint) (model *models.CommentModel) {
 }
 
 type CommentResponse struct {
-	ID           uint               `json:"id"`
-	Content      string             `json:"content"`
-	UserID       uint               `json:"userID"`
-	UserNickname string             `json:"userNickname"`
-	UserAvatar   string             `json:"userAvatar"`
-	ArticleID    uint               `json:"articleID"`
-	ParentID     *uint              `json:"parentID"`
-	DiggCount    int                `json:"diggCount"`   // 点赞数
-	ApplyCount   int                `json:"applyCount"`  // 回复数
-	SubComments  []*CommentResponse `json:"subComments"` // 子评论
+	ID           uint                       `json:"id"`
+	Content      string                     `json:"content"`
+	UserID       uint                       `json:"userID"`
+	UserNickname string                     `json:"userNickname"`
+	UserAvatar   string                     `json:"userAvatar"`
+	ArticleID    uint                       `json:"articleID"`
+	ParentID     *uint                      `json:"parentID"`
+	DiggCount    int                        `json:"diggCount"`   // 点赞数
+	ApplyCount   int                        `json:"applyCount"`  // 回复数
+	SubComments  []*CommentResponse         `json:"subComments"` // 子评论
+	IsDigg       bool                       `json:"isDigg"`
+	Relation     relationship_enum.Relation `json:"relation"`
 }
 
 func GetCommentTreeV3(id uint) (res *CommentResponse) {
@@ -78,11 +81,11 @@ func GetCommentTreeV3(id uint) (res *CommentResponse) {
 	return
 }
 
-func GetCommentTreeV4(id uint) (res *CommentResponse) {
-	return getCommentTreeByLine(id, 1)
+func GetCommentTreeV4(id uint, userDiggMap map[uint]bool, userRelationMap map[uint]relationship_enum.Relation) (res *CommentResponse) {
+	return getCommentTreeByLine(id, 1, userDiggMap, userRelationMap)
 }
 
-func getCommentTreeByLine(id uint, line int) (res *CommentResponse) {
+func getCommentTreeByLine(id uint, line int, userDiggMap map[uint]bool, userRelationMap map[uint]relationship_enum.Relation) (res *CommentResponse) {
 	model := models.CommentModel{
 		Model: models.Model{ID: id},
 	}
@@ -99,12 +102,14 @@ func getCommentTreeByLine(id uint, line int) (res *CommentResponse) {
 		DiggCount:    model.DiggCount + redis_comment.GetCacheDigg(model.ID),
 		ApplyCount:   redis_comment.GetCacheApply(model.ID),
 		SubComments:  make([]*CommentResponse, 0),
+		IsDigg:       userDiggMap[model.ID],
+		Relation:     userRelationMap[model.UserID],
 	}
 	if line >= global.Conf.Site.Article.CommentLine {
 		return
 	}
 	for _, commentModel := range model.SubCommentList {
-		res.SubComments = append(res.SubComments, getCommentTreeByLine(commentModel.ID, line+1))
+		res.SubComments = append(res.SubComments, getCommentTreeByLine(commentModel.ID, line+1, userDiggMap, userRelationMap))
 	}
 
 	return
