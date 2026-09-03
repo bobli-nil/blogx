@@ -4,25 +4,29 @@ import (
 	"blogx_server/common/res"
 	"blogx_server/global"
 	"blogx_server/models"
+	"blogx_server/models/enum/relationship_enum"
+	"blogx_server/service/focus_service"
 	"blogx_server/service/redis_service/redis_user"
+	"blogx_server/utils/jwt"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserBaseInfoResponse struct {
-	UserID       uint   `json:"userID"`
-	CodeAge      int    `json:"codeAge"`
-	Avatar       string `json:"avatar"`
-	NickName     string `json:"nickName"`
-	LookCount    int    `json:"lookCount"`
-	ArticleCount int    `json:"articleCount"`
-	FansCount    int    `json:"fansCount"`
-	FollowCount  int    `json:"followCount"`
-	Place        string `json:"place"`       // IP归属地
-	OpenCollect  bool   `json:"openCollect"` // 公开我的收藏
-	OpenFollow   bool   `json:"openFollow"`  // 公开我的关注
-	OpenFans     bool   `json:"openFans"`    // 公开我的粉丝
-	HomeStyleID  uint   `json:"homeStyleID"` // 主页样式ID
+	UserID       uint                       `json:"userID"`
+	CodeAge      int                        `json:"codeAge"`
+	Avatar       string                     `json:"avatar"`
+	NickName     string                     `json:"nickName"`
+	LookCount    int                        `json:"lookCount"`
+	ArticleCount int                        `json:"articleCount"`
+	FansCount    int                        `json:"fansCount"`
+	FollowCount  int                        `json:"followCount"`
+	Place        string                     `json:"place"`       // IP归属地
+	OpenCollect  bool                       `json:"openCollect"` // 公开我的收藏
+	OpenFollow   bool                       `json:"openFollow"`  // 公开我的关注
+	OpenFans     bool                       `json:"openFans"`    // 公开我的粉丝
+	HomeStyleID  uint                       `json:"homeStyleID"` // 主页样式ID
+	Relation     relationship_enum.Relation `json:"relation"`    // 与登录的人的关系
 }
 
 func (UserApi) UserBaseInfoView(c *gin.Context) {
@@ -54,6 +58,11 @@ func (UserApi) UserBaseInfoView(c *gin.Context) {
 		OpenFollow:   user.UserConfModel.OpenFollow,
 		OpenFans:     user.UserConfModel.OpenFans,
 		HomeStyleID:  user.UserConfModel.HomeStyleID,
+	}
+
+	claims, err := jwt.ParseTokenByGin(c)
+	if err == nil && claims != nil {
+		data.Relation = focus_service.CalcUserRelationship(claims.UserID, data.UserID)
 	}
 
 	var focusList []models.UserFocusModel

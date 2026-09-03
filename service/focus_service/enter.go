@@ -22,7 +22,10 @@ func CalcUserRelationship(A, B uint) relationship_enum.Relation {
 	if userFocusList[0].FocusUserID == A {
 		return relationship_enum.RelationFans
 	}
-	return relationship_enum.RelationFocus
+	if userFocusList[0].FocusUserID == B {
+		return relationship_enum.RelationFocus
+	}
+	return relationship_enum.RelationStranger
 }
 
 func CalcUserPatchRelationship(A uint, BList []uint) (m map[uint]relationship_enum.Relation) {
