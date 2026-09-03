@@ -56,6 +56,7 @@ func CalcUserPatchRelationship(A uint, BList []uint) (m map[uint]relationship_en
 	return
 }
 
+// CalcUserPatchRelationship2 TODO 此处几个方法有缺陷，不能识别出我自己和我自己的关系
 func CalcUserPatchRelationship2(A uint, BList []uint) (m map[uint]relationship_enum.Relation) {
 	m = make(map[uint]relationship_enum.Relation)
 
