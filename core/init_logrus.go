@@ -75,7 +75,7 @@ func (hook *FileDateHook) Fire(entry *logrus.Entry) error {
 	}
 	hook.file.Close()
 
-	os.MkdirAll(fmt.Sprint("%s/%s", hook.logPath, timer), os.ModePerm)
+	os.MkdirAll(fmt.Sprintf("%s/%s", hook.logPath, timer), os.ModePerm)
 	fileName := fmt.Sprintf("%s/%s/%s", hook.logPath, timer, hook.appName)
 	hook.file, _ = os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	hook.fileDate = timer
