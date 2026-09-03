@@ -83,6 +83,15 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 		}
 	}
 
+	query := global.DB.Where("")
+	if cr.CollectID != 0 {
+		var articleIDList []uint
+		global.DB.Model(&models.UserArticleCollectModel{}).Where("collect_id = ?", cr.CollectID).Select("article_id").Scan(&articleIDList)
+		if len(articleIDList) > 0 {
+			query = query.Where("article_id in ?", articleIDList)
+		}
+	}
+
 	_, ok := orderColumnMap[cr.Order]
 	if !ok && cr.Order != "" {
 		res.FailWithMsg("该字段不支持排序", c)
@@ -117,6 +126,7 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 		PageInfo:     cr.PageInfo,
 		PreLoads:     []string{"CategoryModel", "UserModel"},
 		DefaultOrder: "created_at desc",
+		Where:        query,
 	}
 	if len(topArticleIDList) > 0 {
 		options.DefaultOrder = fmt.Sprintf("%s, created_at desc", sql.ConvertSliceOrderSql(topArticleIDList))
