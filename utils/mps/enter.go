@@ -25,6 +25,7 @@ func Struct2Map(data any, t string) (mp map[string]any) {
 		}
 
 		if kind == reflect.Ptr {
+			// TODO 这里有一个276集的bug，后面好好看看反射再来改
 			mp[tagValue] = fieldVal.Elem().Interface()
 		} else {
 			mp[tagValue] = fieldVal.Interface()
