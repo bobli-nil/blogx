@@ -26,9 +26,13 @@ type SiteInfoRequest struct {
 type QiNiu struct {
 	Enable bool `json:"enable"`
 }
+type Ai struct {
+	Enable bool `json:"enable"`
+}
 
 type SiteInfoResponse struct {
 	QiNiu QiNiu `json:"qiNiu"`
+	Ai    Ai    `json:"ai"`
 	conf.Site
 }
 
@@ -48,6 +52,9 @@ func (s *SiteApi) SiteInfoView(c *gin.Context) {
 			Site: global.Conf.Site,
 			QiNiu: QiNiu{
 				Enable: global.Conf.QiNiu.Enable,
+			},
+			Ai: Ai{
+				Enable: global.Conf.Ai.Enable,
 			},
 		}, c)
 		return
