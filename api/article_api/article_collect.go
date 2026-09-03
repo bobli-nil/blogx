@@ -71,7 +71,7 @@ func (ArticleApi) ArticleCollectView(c *gin.Context) {
 			res.FailWithMsg("收藏失败", c)
 			return
 		}
-		global.DB.Model(&collectModel).Update("article_count", gorm.Expr("article_count + ?", 1))
+		global.DB.Debug().Model(&collectModel).Update("article_count", gorm.Expr("COALESCE(article_count, 0) + ?", 1))
 		res.OkWithMsg("收藏成功", c)
 		message_service.InsertCollectArticleMessage(model)
 		redis_article.SetCacheCollect(cr.ArticleID, true)
@@ -79,16 +79,12 @@ func (ArticleApi) ArticleCollectView(c *gin.Context) {
 	}
 
 	// 已收藏，进行取消收藏
-	err = global.DB.Where(&models.UserArticleCollectModel{
-		UserID:    claims.UserID,
-		ArticleID: cr.ArticleID,
-		CollectID: cr.CollectID,
-	}).Delete(&articleCollect).Error
+	err = global.DB.Delete(&articleCollect).Error
 	if err != nil {
 		res.FailWithMsg("取消收藏失败", c)
 		return
 	}
-	global.DB.Model(&collectModel).Update("article_count", gorm.Expr("article_count - ?", 1))
+	global.DB.Debug().Model(&collectModel).Update("article_count", gorm.Expr("COALESCE(article_count, 0) - ?", 1))
 	res.OkWithMsg("取消收藏成功", c)
 	redis_article.SetCacheCollect(cr.ArticleID, false)
 	return
