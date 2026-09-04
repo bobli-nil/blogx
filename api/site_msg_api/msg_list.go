@@ -7,6 +7,8 @@ import (
 	"blogx_server/middleware"
 	"blogx_server/models"
 	"blogx_server/models/enum/message_type_enum"
+	"blogx_server/models/enum/relationship_enum"
+	"blogx_server/service/focus_service"
 	"blogx_server/utils/jwt"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +17,11 @@ import (
 type SiteMsgListRequest struct {
 	common.PageInfo
 	T int8 `form:"t" binding:"required,oneof=1 2 3"` // 1评论和回复 2赞和收藏 3系统
+}
+
+type SiteMsgListResponse struct {
+	models.MessageModel
+	Relation relationship_enum.Relation `json:"relation"`
 }
 
 func (SiteMsgApi) SiteMsgListView(c *gin.Context) {
@@ -31,13 +38,31 @@ func (SiteMsgApi) SiteMsgListView(c *gin.Context) {
 		typeList = append(typeList, message_type_enum.SystemType)
 	}
 
-	list, count, _ := common.ListQuery(models.MessageModel{
+	_list, count, _ := common.ListQuery(models.MessageModel{
 		RevUserID: claims.UserID,
 	}, common.Options{
 		Debug:    true,
 		PageInfo: cr.PageInfo,
 		Where:    global.DB.Where("type in ?", typeList),
 	})
+
+	var userIDList []uint
+	for _, model := range _list {
+		if model.ActionUserID != 0 {
+			userIDList = append(userIDList, model.ActionUserID)
+		}
+	}
+	relationMap := make(map[uint]relationship_enum.Relation)
+	if len(userIDList) > 0 {
+		relationMap = focus_service.CalcUserPatchRelationship2(claims.UserID, userIDList)
+	}
+	list := make([]SiteMsgListResponse, 0)
+	for _, model := range _list {
+		list = append(list, SiteMsgListResponse{
+			MessageModel: model,
+			Relation:     relationMap[model.ActionUserID],
+		})
+	}
 
 	res.OkWithList(list, count, c)
 }
