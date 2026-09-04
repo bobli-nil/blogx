@@ -18,6 +18,7 @@ type BannerCreateRequest struct {
 	Cover string `json:"cover"`
 	Href  string `json:"href"`
 	Show  *bool  `json:"show"`
+	Type  int8   `json:"type" binding:"required,oneof=1 2"`
 }
 
 func (BannerApi) BannerCreateView(c *gin.Context) {
@@ -32,6 +33,7 @@ func (BannerApi) BannerCreateView(c *gin.Context) {
 		Cover: req.Cover,
 		Href:  req.Href,
 		Show:  req.Show,
+		Type:  req.Type,
 	}).Error
 	if err != nil {
 		res.FailWithError(err, c)
@@ -43,18 +45,19 @@ func (BannerApi) BannerCreateView(c *gin.Context) {
 type BannerListRequest struct {
 	common.PageInfo
 	Show *bool `form:"show"`
+	Type int8  `form:"type"`
 }
 
 func (BannerApi) BannerListView(c *gin.Context) {
 	var cr BannerListRequest
 	err := c.ShouldBindQuery(&cr)
-	fmt.Printf("---->%+v\n", cr)
 	if err != nil {
 		res.FailWithError(err, c)
 		return
 	}
 	list, count, err := common.ListQuery(models.BannerModel{
 		Show: cr.Show,
+		Type: cr.Type,
 	}, common.Options{
 		PageInfo: cr.PageInfo,
 		Debug:    true,
@@ -105,6 +108,7 @@ func (BannerApi) BannerUpdateView(c *gin.Context) {
 		Cover: req.Cover,
 		Href:  req.Href,
 		Show:  req.Show,
+		Type:  req.Type,
 	})
 
 	if db.Error != nil {
