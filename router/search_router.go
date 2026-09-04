@@ -3,6 +3,7 @@ package router
 import (
 	"blogx_server/api"
 	"blogx_server/api/search_api"
+	"blogx_server/common"
 	"blogx_server/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -11,5 +12,6 @@ import (
 func SearchRouter(r *gin.RouterGroup) {
 	searchApi := api.App.SearchApi
 	r.GET("article/search", middleware.BindQueryMiddleware[search_api.ArticleSearchRequest], searchApi.ArticleSearchView)
+	r.GET("article/tags", middleware.BindQueryMiddleware[common.PageInfo], searchApi.TagAggView)
 	r.GET("text/search", middleware.BindQueryMiddleware[search_api.TextSearchRequest], searchApi.TextSearchView)
 }
