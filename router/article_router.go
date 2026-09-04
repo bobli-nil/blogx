@@ -43,4 +43,5 @@ func ArticleRouter(r *gin.RouterGroup) {
 	ar.GET("tag/options", middleware.AuthMiddleware, articleApi.ArticleTagOptionsView)
 
 	ar.GET("author_recommend", middleware.BindQueryMiddleware[common.PageInfo], articleApi.AuthorRecommendView)
+	ar.GET("article_recommend", middleware.BindQueryMiddleware[common.PageInfo], articleApi.ArticleRecommendView)
 }
