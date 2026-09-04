@@ -24,6 +24,7 @@ type TextSearchResponse struct {
 	ArticleID uint   `json:"articleID"`
 	Head      string `json:"head"`
 	Body      string `json:"body"`
+	Flag      string `json:"flag"`
 }
 
 func (SearchApi) TextSearchView(c *gin.Context) {
@@ -68,6 +69,7 @@ func (SearchApi) TextSearchView(c *gin.Context) {
 			logrus.Warnf("解析失败 %s  %s", err, string(hit.Source))
 			continue
 		}
+		headFlag := item.Head // 没加高亮的head
 		if len(hit.Highlight["head"]) > 0 {
 			item.Head = hit.Highlight["head"][0]
 		}
@@ -78,6 +80,7 @@ func (SearchApi) TextSearchView(c *gin.Context) {
 			ArticleID: item.ArticleID,
 			Head:      item.Head,
 			Body:      item.Body,
+			Flag:      headFlag,
 		})
 	}
 
