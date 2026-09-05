@@ -21,7 +21,7 @@ type ArticleListRequest struct {
 	UserID     uint               `form:"userID"`
 	CategoryID *uint              `form:"categoryID"`
 	Status     enum.ArticleStatus `form:"status" binding:"oneof=1 2 3"`
-	CollectID  uint               `form:"collectID"`
+	CollectID  int                `form:"collectID"`
 }
 
 type ArticleListResponse struct {
@@ -86,7 +86,16 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 	query := global.DB.Where("")
 	if cr.CollectID != 0 {
 		var articleIDList []uint
-		global.DB.Model(&models.UserArticleCollectModel{}).Where("collect_id = ?", cr.CollectID).Select("article_id").Scan(&articleIDList)
+		if cr.CollectID != -1 {
+			global.DB.Model(&models.UserArticleCollectModel{}).Where("collect_id = ?", cr.CollectID).Select("article_id").Scan(&articleIDList)
+		} else {
+			// 如果CollectID是-1就查所有收藏夹的文章
+			if cr.UserID == 0 {
+				res.FailWithMsg("查看所有收藏夹文章，需要用户ID", c)
+				return
+			}
+			global.DB.Model(&models.UserArticleCollectModel{}).Where("user_id = ?", cr.UserID).Select("article_id").Scan(&articleIDList)
+		}
 		if len(articleIDList) > 0 {
 			query = query.Where("article_id in ?", articleIDList)
 		}
