@@ -4,6 +4,7 @@ import (
 	"blogx_server/common"
 	"blogx_server/common/res"
 	"blogx_server/global"
+	"blogx_server/middleware"
 	"blogx_server/models"
 	"errors"
 	"fmt"
@@ -39,6 +40,7 @@ func (BannerApi) BannerCreateView(c *gin.Context) {
 		res.FailWithError(err, c)
 		return
 	}
+	middleware.CacheClose(middleware.CacheBannerPrefix)
 	res.OkWithMsg("创建Banner成功", c)
 }
 
@@ -88,6 +90,7 @@ func (BannerApi) BannerRemoveView(c *gin.Context) {
 		res.FailWithMsg("不存在该记录", c)
 		return
 	}
+	middleware.CacheClose(middleware.CacheBannerPrefix)
 	res.OkWithMsg(fmt.Sprintf("删除成功，成功删除%d记录，失败删除%d记录", successCount, failCount), c)
 }
 
@@ -119,5 +122,6 @@ func (BannerApi) BannerUpdateView(c *gin.Context) {
 		res.FailWithMsg("不存在该记录", c)
 		return
 	}
+	middleware.CacheClose(middleware.CacheBannerPrefix)
 	res.OkWithMsg("更新成功", c)
 }
