@@ -4,6 +4,7 @@ import (
 	"blogx_server/global"
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,13 +14,15 @@ import (
 type CacheMiddlewarePrefix string
 
 const (
-	CacheBannerPrefix CacheMiddlewarePrefix = "cache_banner_"
+	CacheBannerPrefix       CacheMiddlewarePrefix = "cache_banner_"
+	CacheDataComputerPrefix CacheMiddlewarePrefix = "cache_data_computer_"
 )
 
 type CacheOption struct {
-	Prefix CacheMiddlewarePrefix `json:"prefix"`
-	Time   time.Duration         `json:"time"`
-	Params []string              `json:"params"`
+	Prefix      CacheMiddlewarePrefix     `json:"prefix"`
+	Time        time.Duration             `json:"time"`
+	Params      []string                  `json:"params"`
+	NoCacheFunc func(c *gin.Context) bool `json:"-"`
 }
 
 type CacheResponseWriter struct {
@@ -37,6 +40,17 @@ func NewBannerCacheOption() CacheOption {
 		Prefix: CacheBannerPrefix,
 		Time:   time.Hour,
 		Params: []string{"type"},
+		NoCacheFunc: func(c *gin.Context) bool {
+			referer := c.GetHeader("referer")
+			return strings.Contains(referer, "admin")
+		},
+	}
+}
+
+func NewDataComputerCacheOption() CacheOption {
+	return CacheOption{
+		Prefix: CacheDataComputerPrefix,
+		Time:   time.Minute,
 	}
 }
 
@@ -49,7 +63,8 @@ func CacheMiddleware(option CacheOption) gin.HandlerFunc {
 		key := fmt.Sprintf("%s%s", option.Prefix, values.Encode())
 		// 请求部分
 		val, err := global.Redis.Get(key).Result()
-		if err == nil {
+		// 如果请求头referer中包含admin路径，就不走缓存
+		if (err == nil) && (option.NoCacheFunc == nil || !option.NoCacheFunc(c)) {
 			c.Abort()
 			fmt.Println("走缓存了")
 			c.Header("Content-Type", "application/json; charset=utf-8")

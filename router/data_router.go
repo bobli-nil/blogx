@@ -15,5 +15,5 @@ func DataRouter(r *gin.RouterGroup) {
 	dr.GET("sum", middleware.AdminMiddleware, dataApi.SumView)
 	dr.GET("article", middleware.AdminMiddleware, dataApi.ArticleYearDataView)
 	dr.GET("growth", middleware.AdminMiddleware, middleware.BindQueryMiddleware[data_api.GrowthDataRequest], dataApi.GrowthData)
-	dr.GET("computer", middleware.AdminMiddleware, dataApi.ComputerDataView)
+	dr.GET("computer", middleware.AdminMiddleware, middleware.CacheMiddleware(middleware.NewDataComputerCacheOption()), dataApi.ComputerDataView)
 }
