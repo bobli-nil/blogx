@@ -90,15 +90,23 @@ func (ArticleApi) ArticleCollectView(c *gin.Context) {
 	return
 }
 
+type ArticleCollectPatchRemoveRequest struct {
+	CollectID     uint   `json:"collectID"`
+	ArticleIDList []uint `json:"articleIDList"`
+}
+
 func (ArticleApi) ArticleCollectPatchRemove(c *gin.Context) {
-	cr := middleware.GetBind[models.DeleteRequest](c)
+	cr := middleware.GetBind[ArticleCollectPatchRemoveRequest](c)
 	claims := jwt.GetClaims(c)
 
 	var collectArticleList []models.UserArticleCollectModel
-	global.DB.Find(&collectArticleList, "id in ? and user_id = ?", cr.IDList, claims.UserID)
+	global.DB.Find(&collectArticleList, "collect_id = ? and article_id in ? and user_id = ?", cr.CollectID, cr.ArticleIDList, claims.UserID)
 
 	if len(collectArticleList) > 0 {
 		global.DB.Delete(&collectArticleList)
+		for _, u := range cr.ArticleIDList {
+			redis_article.SetCacheCollect(u, false)
+		}
 	}
 
 	msg := fmt.Sprintf("批量移除文章%d篇", len(collectArticleList))
