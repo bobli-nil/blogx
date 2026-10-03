@@ -6,6 +6,7 @@ import (
 	"blogx_server/models/enum/relationship_enum"
 	"blogx_server/service/redis_service/redis_comment"
 	"fmt"
+	"time"
 )
 
 func GetRootComment(commentID uint) (model *models.CommentModel) {
@@ -54,6 +55,7 @@ type CommentResponse struct {
 	SubComments  []*CommentResponse         `json:"subComments"` // 子评论
 	IsDigg       bool                       `json:"isDigg"`
 	Relation     relationship_enum.Relation `json:"relation"`
+	CreatedAt    *time.Time                 `json:"createdAt"`
 }
 
 func GetCommentTreeV3(id uint) (res *CommentResponse) {
@@ -104,6 +106,7 @@ func getCommentTreeByLine(id uint, line int, userDiggMap map[uint]bool, userRela
 		SubComments:  make([]*CommentResponse, 0),
 		IsDigg:       userDiggMap[model.ID],
 		Relation:     userRelationMap[model.UserID],
+		CreatedAt:    model.CreatedAt,
 	}
 	if line >= global.Conf.Site.Article.CommentLine {
 		return

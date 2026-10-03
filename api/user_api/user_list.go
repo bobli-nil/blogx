@@ -20,6 +20,7 @@ type UserListResponse struct {
 	Nickname      string        `json:"nickname"`
 	Username      string        `json:"username"`
 	Avatar        string        `json:"avatar"`
+	Abstract      string        `json:"abstract"`
 	IP            string        `json:"ip"`
 	Addr          string        `json:"addr"`
 	ArticleCount  int           `json:"articleCount"`
@@ -45,6 +46,7 @@ func (UserApi) UserListView(c *gin.Context) {
 			Nickname:     model.Nickname,
 			Username:     model.Username,
 			Avatar:       model.Avatar,
+			Abstract:     model.Abstract,
 			ArticleCount: len(model.ArticleList),
 			CreatedAt:    model.CreatedAt,
 			Role:         model.Role,

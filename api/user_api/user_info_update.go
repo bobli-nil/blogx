@@ -65,7 +65,9 @@ func (UserApi) UserInfoUpdateView(c *gin.Context) {
 				return
 			}
 		}
-		userConfMap["update_username_date"] = time.Now()
+		if cr.Username != nil {
+			userConfMap["update_username_date"] = time.Now()
+		}
 
 		// QQ用户不能修改昵称和头像
 		if (cr.Avatar != nil || cr.Nickname != nil) && user.RegisterSource == enum.RegisterQQSourceType {
@@ -86,7 +88,27 @@ func (UserApi) UserInfoUpdateView(c *gin.Context) {
 			res.FailWithMsg("用户配置信息不存在", c)
 			return
 		}
-		if err = global.DB.Model(&userConf).Updates(userConfMap).Error; err != nil {
+		if cr.LikeTags != nil {
+			userConf.LikeTags = *cr.LikeTags
+		}
+		if cr.OpenCollect != nil {
+			userConf.OpenCollect = *cr.OpenCollect
+		}
+		if cr.OpenFollow != nil {
+			userConf.OpenFollow = *cr.OpenFollow
+		}
+		if cr.OpenFans != nil {
+			userConf.OpenFans = *cr.OpenFans
+		}
+		if cr.HomeStyleID != nil {
+			userConf.HomeStyleID = *cr.HomeStyleID
+		}
+		fmt.Printf("%+v", userConf)
+		if err = global.DB.
+			Model(&userConf).
+			Where("user_id = ?", claims.UserID).
+			Select("like_tags", "open_collect", "open_follow", "open_fans", "home_style_id").
+			Updates(userConf).Error; err != nil {
 			res.FailWithMsg("更新失败", c)
 			return
 		}

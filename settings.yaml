@@ -24,24 +24,24 @@ upload:
   - gif
   uploadDir: images001
 db:
-  - user: root
-    password: 123456
-    host: 118.25.141.36
-    port: 3306
-    db: blogx
-    debug: false
-    source: mysql
-  - user: root
-    password: 123456
-    host: 118.25.141.36
-    port: 3307
-    db: blogx
-    debug: false
-    source: mysql
+- user: root
+  password: "123456"
+  host: 118.25.141.36
+  port: 3306
+  db: blogx
+  debug: false
+  source: mysql
+- user: root
+  password: "123456"
+  host: 118.25.141.36
+  port: 3307
+  db: blogx
+  debug: false
+  source: mysql
 es:
   url: http://118.25.141.36:9200
-  username:
-  password:
+  username: ""
+  password: ""
 site:
   siteInfo:
     title: 这是站点标题
@@ -56,19 +56,23 @@ site:
     keywords: kkk
     description: ddd
   about:
-    siteAbout: ""
+    siteDate: 2026-10-01
     qq: ""
     wechat: ""
-    gitee: ""
+    gitee: https://gitee.com/another-lee
     bilibili: ""
-    github: ""
+    github: https://github.com/bobli-nil
   login:
     qqLogin: false
     usernamePwdLogin: true
     emailPwdLogin: true
-    captcha: false
+    captcha: true
   indexRight:
-    list: []
+    list:
+    - title: 右侧组件1
+      enable: true
+    - title: 右侧组件2
+      enable: true
   article:
     noExamine: true
     commentLine: 3
@@ -97,6 +101,6 @@ qiNiu:
 ai:
   enable: true
   secretKey: sk-IuH6bN7IhGx1lC1dq7bIdgPkDJDUviOGZKB4fDqJMdNH6NXz
-  nickname: "AI小管家"
-  avatar: ""
-  abstract: "Hello，我是你的AI小管家，我可以根据你的描述在本站找到你喜欢的文章，赶紧来试试吧"
+  nickname: AI小管家
+  avatar: http://cdn.limingru.com/blogx/b934de166679e4e01719994b98510042.png
+  abstract: Hello，我是你的AI小管家，我可以根据你的描述在本站找到你喜欢的文章，赶紧来试试吧

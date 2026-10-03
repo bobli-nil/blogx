@@ -54,7 +54,7 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 			res.FailWithMsg("用户ID必填", c)
 			return
 		}
-		cr.Status = 0
+		cr.Status = 3
 		cr.Order = ""
 		if cr.CollectID != 0 {
 			var userConf models.UserConfModel
@@ -81,6 +81,7 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 			res.FailWithMsg("角色错误", c)
 			return
 		}
+		cr.Status = 0
 	}
 
 	query := global.DB.Where("")
@@ -95,9 +96,14 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 				return
 			}
 			global.DB.Model(&models.UserArticleCollectModel{}).Where("user_id = ?", cr.UserID).Select("article_id").Scan(&articleIDList)
+
 		}
+		cr.UserID = 0 // 这里置为0是因为后面查 ArticleModel 用到了
 		if len(articleIDList) > 0 {
-			query = query.Where("article_id in ?", articleIDList)
+			query = query.Where("id in ?", articleIDList)
+		} else {
+			res.OkWithList(make([]any, 0), 0, c)
+			return
 		}
 	}
 
@@ -111,10 +117,11 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 	var userTopMap = map[uint]bool{}
 	var adminTopMap = map[uint]bool{}
 	var topArticleIDList []uint
-	if cr.UserID != 0 {
+	if cr.UserID != 0 || cr.Type == 3 {
+		adminIDList := make([]uint, 0)
+		global.DB.Model(&models.UserModel{}).Where("role = ?", enum.AdminRole).Select("id").Scan(&adminIDList)
 		var userTopArticle []models.UserTopArticleModel
-		// TODO 此处有bug，这里查出来的只有自己置顶的，还有管理员置顶的没查出，后面修复
-		if err := global.DB.Debug().Preload("UserModel").Order("created_at desc").Find(&userTopArticle, cr.UserID).Error; err != nil {
+		if err := global.DB.Where("user_id = ?", cr.UserID).Or("user_id in ?", adminIDList).Debug().Preload("UserModel").Order("created_at desc").Find(&userTopArticle).Error; err != nil {
 			res.FailWithMsg(err.Error(), c)
 			return
 		}

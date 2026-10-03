@@ -52,11 +52,13 @@ func (ArticleApi) ArticleUpdateView(c *gin.Context) {
 	}
 
 	// 判断文章分类是不是自己创建的
-	var category models.CategoryModel
-	err = global.DB.Take(&category, "id = ? and user_id = ?", cr.CategoryID, user.ID).Error
-	if err != nil {
-		res.FailWithMsg("文章分类不存在", c)
-		return
+	if cr.CategoryID != nil {
+		var category models.CategoryModel
+		err = global.DB.Take(&category, "id = ? and user_id = ?", cr.CategoryID, user.ID).Error
+		if err != nil {
+			res.FailWithMsg("文章分类不存在", c)
+			return
+		}
 	}
 
 	// 文章正文防止XSS攻击

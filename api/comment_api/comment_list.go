@@ -87,6 +87,7 @@ func (CommentApi CommentApi) CommentListView(c *gin.Context) {
 			UserAvatar:   model.UserModel.Avatar,
 			ArticleID:    model.ArticleID,
 			ArticleTitle: model.ArticleModel.Title,
+			ArticleCover: model.ArticleModel.Cover,
 			DiggCount:    model.DiggCount + redis_comment.GetCacheDigg(model.ID),
 			Relation:     relationMap[model.UserID],
 			IsMe:         claims.UserID == model.UserID,

@@ -4,12 +4,14 @@ import (
 	"blogx_server/common/res"
 	"blogx_server/global"
 	"blogx_server/models"
+	"blogx_server/models/enum"
 	"blogx_server/models/enum/relationship_enum"
 	"blogx_server/service/focus_service"
 	"blogx_server/service/redis_service/redis_user"
 	"blogx_server/utils/jwt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type UserBaseInfoResponse struct {
@@ -17,6 +19,7 @@ type UserBaseInfoResponse struct {
 	CodeAge      int                        `json:"codeAge"`
 	Avatar       string                     `json:"avatar"`
 	NickName     string                     `json:"nickName"`
+	Role         enum.RoleType              `json:"role"`
 	LookCount    int                        `json:"lookCount"`
 	ArticleCount int                        `json:"articleCount"`
 	FansCount    int                        `json:"fansCount"`
@@ -36,10 +39,20 @@ func (UserApi) UserBaseInfoView(c *gin.Context) {
 		res.FailWithError(err, c)
 		return
 	}
+	// 如果用户没传就尝试从token中拿
+	if cr.ID == 0 {
+		claims, err := jwt.ParseTokenByGin(c)
+		if err != nil {
+			res.FailWithMsg("请登录或传用户ID", c)
+			return
+		}
+		cr.ID = claims.UserID
+	}
 
 	var user models.UserModel
 	err = global.DB.Preload("UserConfModel").Preload("ArticleList").Take(&user, cr.ID).Error
 	if err != nil {
+		logrus.Errorf("查询 UserConf 报错 %s", err)
 		res.FailWithMsg("用户不存在", c)
 		return
 	}
@@ -49,11 +62,12 @@ func (UserApi) UserBaseInfoView(c *gin.Context) {
 		CodeAge:      user.CodeAge(),
 		Avatar:       user.Avatar,
 		NickName:     user.Nickname,
+		Role:         user.Role,
 		LookCount:    user.UserConfModel.LookCount + redis_user.GetCacheLook(cr.ID),
 		ArticleCount: len(user.ArticleList),
 		FansCount:    0,
 		FollowCount:  0,
-		Place:        user.Avatar,
+		Place:        user.Address,
 		OpenCollect:  user.UserConfModel.OpenCollect,
 		OpenFollow:   user.UserConfModel.OpenFollow,
 		OpenFans:     user.UserConfModel.OpenFans,

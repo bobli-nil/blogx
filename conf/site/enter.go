@@ -19,13 +19,13 @@ type Seo struct {
 }
 
 type About struct {
-	Version   string `yaml:"-" json:"version"`
-	SiteAbout string `yaml:"siteAbout" json:"siteAbout"`
-	QQ        string `yaml:"qq" json:"qq"`
-	Wechat    string `yaml:"wechat" json:"wechat"`
-	Gitee     string `yaml:"gitee" json:"gitee"`
-	Bilibili  string `yaml:"bilibili" json:"bilibili"`
-	Github    string `yaml:"github" json:"github"`
+	Version  string `yaml:"-" json:"version"`
+	SiteDate string `yaml:"siteDate" json:"siteDate"`
+	QQ       string `yaml:"qq" json:"qq"`
+	Wechat   string `yaml:"wechat" json:"wechat"`
+	Gitee    string `yaml:"gitee" json:"gitee"`
+	Bilibili string `yaml:"bilibili" json:"bilibili"`
+	Github   string `yaml:"github" json:"github"`
 }
 
 type Login struct {

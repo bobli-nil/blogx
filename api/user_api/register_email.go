@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -59,17 +60,17 @@ func (UserApi) RegisterEmailView(c *gin.Context) {
 	}
 	err := global.DB.Transaction(func(tx *gorm.DB) error {
 		if err := global.DB.Create(&user).Error; err != nil {
-			res.FailWithMsg("注册失败", c)
+			logrus.Errorf("创建用户失败 %s", err)
 			return err
 		}
-		userConf := models.UserConfModel{
-			UserID:             user.ID,
-			UpdateUsernameDate: user.CreatedAt,
-		}
-		if err := global.DB.Create(&userConf).Error; err != nil {
-			res.FailWithMsg("注册失败", c)
-			return err
-		}
+		//userConf := models.UserConfModel{
+		//	UserID:             user.ID,
+		//	UpdateUsernameDate: user.CreatedAt,
+		//}
+		//if err := global.DB.Create(&userConf).Error; err != nil {
+		//	logrus.Errorf("创建用户配置失败 %s", err)
+		//	return err
+		//}
 		return nil
 	})
 	if err != nil {
